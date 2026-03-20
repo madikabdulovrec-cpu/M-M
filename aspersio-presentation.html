@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aspersio x Нейрон — IT-партнёрство</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--pri:#6366f1;--accent:#06b6d4;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--dark:#0f172a;--txt:#334155;--txt2:#64748b;--txt3:#94a3b8;--bg:#f8fafc;--border:#e2e8f0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--txt);background:#fff}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:14px 48px;display:flex;justify-content:space-between;align-items:center;background:rgba(15,23,42,.95);backdrop-filter:blur(20px)}
+.nav-brand{display:flex;align-items:center;gap:10px;color:#fff;font-size:18px;font-weight:700;text-decoration:none}
+.nav-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--pri),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px}
+.nav-hub{font-size:11px;color:var(--accent);background:rgba(6,182,212,.1);padding:3px 10px;border-radius:100px;font-weight:600}
+.nav-cta{background:linear-gradient(135deg,var(--pri),var(--accent));color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;transition:.3s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,102,241,.4)}
+
+/* SLIDE */
+.slide{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 60px;position:relative;overflow:hidden}
+.slide-dark{background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff}
+.slide-alt{background:var(--bg)}
+.slide-accent{background:linear-gradient(135deg,#312e81,#1e1b4b);color:#fff}
+.slide-green{background:linear-gradient(135deg,#064e3b,#0f172a);color:#fff}
+
+/* TYPE */
+.tag{display:inline-block;padding:5px 14px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
+.tag-dark{background:rgba(99,102,241,.15);color:#a5b4fc}
+.tag-light{background:rgba(99,102,241,.1);color:var(--pri)}
+.tag-green{background:rgba(16,185,129,.15);color:#34d399}
+.slide h1{font-size:52px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.slide h2{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:12px}
+.sub{font-size:17px;line-height:1.6;max-width:560px}
+.sub-dim{color:var(--txt3)}
+.sub-dark{color:var(--txt2)}
+h1 .hl{background:linear-gradient(135deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.center{text-align:center;margin-left:auto;margin-right:auto}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;max-width:1200px;margin:0 auto;width:100%}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;width:100%}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1100px;margin:0 auto;width:100%}
+.g6{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1100px;margin:0 auto;width:100%}
+
+/* HERO NUMBERS */
+.hero-nums{display:flex;gap:48px;margin-top:40px}
+.hero-num .val{font-size:48px;font-weight:800;background:linear-gradient(135deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.hero-num .lbl{font-size:13px;color:var(--txt3);margin-top:4px}
+
+/* SERVICE CARD */
+.svc-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;text-align:center;transition:.3s}
+.svc-card:hover{background:rgba(255,255,255,.07);transform:translateY(-3px)}
+.svc-icon{font-size:40px;margin-bottom:12px}
+.svc-card h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.svc-card p{font-size:12px;color:var(--txt3)}
+
+/* PORTFOLIO LOGOS */
+.logos{display:flex;gap:32px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:32px}
+.logo-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;color:var(--txt3)}
+
+/* STAT PILL */
+.stat-pill{text-align:center;padding:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px}
+.stat-pill .sp-v{font-size:44px;font-weight:800;line-height:1}
+.stat-pill .sp-l{font-size:13px;color:var(--txt3);margin-top:6px}
+
+/* PROGRESS */
+.prog{margin-bottom:14px}
+.prog .prog-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.prog .prog-val{font-weight:700}
+.prog-bar{height:8px;border-radius:4px;overflow:hidden}
+.prog-bar-d{background:rgba(255,255,255,.08)}
+.prog-bar-l{background:#e2e8f0}
+.prog-fill{height:100%;border-radius:4px;transition:width 1.5s ease}
+
+/* MOCK PANEL */
+.panel{border-radius:16px;padding:24px}
+.panel-dark{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.panel-light{background:#fff;border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.06)}
+.panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.panel-hdr-l{border-color:var(--border)}
+.panel-title{font-size:14px;font-weight:700}
+.badge{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600}
+.badge-g{background:rgba(16,185,129,.12);color:#10b981}
+.badge-b{background:rgba(99,102,241,.12);color:#a5b4fc}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{border-radius:12px;padding:14px}
+.kpi-d{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.kpi-l{background:var(--bg);border:1px solid var(--border)}
+.kpi .kv{font-size:24px;font-weight:800;line-height:1}
+.kpi .kl{font-size:10px;color:var(--txt3);margin-top:4px}
+.kpi .kc{font-size:9px;font-weight:600;margin-top:4px;padding:2px 6px;border-radius:100px;display:inline-block}
+.kc-up{background:rgba(16,185,129,.12);color:#10b981}
+
+/* CHART BARS */
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px}
+.bar{flex:1;border-radius:5px 5px 0 0;min-width:16px;transition:.3s;cursor:pointer;position:relative}
+.bar:hover{filter:brightness(1.2)}
+.bar-labels{display:flex;gap:6px;margin-top:4px}
+.bar-labels span{flex:1;text-align:center;font-size:9px;color:var(--txt3)}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:20px;justify-content:center}
+.donut{width:120px;height:120px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.donut-hole{position:absolute;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-hole-d{background:var(--dark)}
+.dv{font-size:18px;font-weight:800}
+.dl{font-size:9px;color:var(--txt3)}
+.legend{display:flex;flex-direction:column;gap:5px}
+.legend-i{display:flex;align-items:center;gap:6px;font-size:11px}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* MINI TABLE */
+.mt{width:100%;font-size:11px}
+.mt td,.mt th{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.mt-l td,.mt-l th{border-color:var(--border)}
+.mt th{font-size:9px;text-transform:uppercase;color:var(--txt3);font-weight:600;letter-spacing:.5px}
+.st{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:600}
+.st-ok{background:rgba(16,185,129,.12);color:#10b981}
+.st-w{background:rgba(245,158,11,.12);color:#f59e0b}
+.st-e{background:rgba(239,68,68,.12);color:#ef4444}
+.st-i{background:rgba(6,182,212,.12);color:#06b6d4}
+
+/* PROBLEM CARD */
+.prob{background:#fff;border-radius:14px;padding:24px;border:1px solid var(--border);text-align:center;position:relative}
+.prob::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),#f97316);border-radius:14px 14px 0 0}
+.prob .p-icon{font-size:36px;margin-bottom:6px}
+.prob .p-val{font-size:30px;font-weight:800;color:var(--red)}
+.prob .p-lbl{font-size:12px;color:var(--txt2);margin-top:4px;line-height:1.4}
+
+/* APPROACH STEP */
+.approach-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+.approach-card::before{content:attr(data-num);position:absolute;top:16px;right:20px;font-size:48px;font-weight:800;color:rgba(255,255,255,.04)}
+.ac-icon{font-size:32px;margin-bottom:10px}
+.approach-card h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.approach-card p{font-size:12px;color:var(--txt3);line-height:1.5}
+.ac-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.ac-tag{background:rgba(99,102,241,.1);color:#a5b4fc;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600}
+
+/* POTENTIAL GRID */
+.pot-card{background:#fff;border-radius:16px;padding:24px;border:1px solid var(--border);transition:.3s;position:relative;overflow:hidden}
+.pot-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
+.pot-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.pot-card.c1::before{background:linear-gradient(90deg,#6366f1,#818cf8)}
+.pot-card.c2::before{background:linear-gradient(90deg,#06b6d4,#22d3ee)}
+.pot-card.c3::before{background:linear-gradient(90deg,#10b981,#34d399)}
+.pot-card.c4::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.pot-card.c5::before{background:linear-gradient(90deg,#ec4899,#f472b6)}
+.pot-card.c6::before{background:linear-gradient(90deg,#8b5cf6,#a78bfa)}
+.pot-icon{font-size:28px;margin-bottom:8px}
+.pot-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.pot-card p{font-size:12px;color:var(--txt2);line-height:1.5}
+
+/* ROI */
+.roi-card{text-align:center;padding:28px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px}
+.roi-v{font-size:48px;font-weight:800;line-height:1}
+.roi-l{font-size:13px;color:var(--txt3);margin-top:6px}
+
+/* CTA */
+.cta-contacts{display:flex;gap:48px;justify-content:center;margin-top:48px;flex-wrap:wrap}
+.cc{text-align:center}
+.cc .cc-icon{font-size:32px;margin-bottom:6px}
+.cc .cc-val{font-size:20px;font-weight:700;color:#fff}
+.cc .cc-lbl{font-size:12px;color:var(--txt3)}
+.btn-big{display:inline-block;background:linear-gradient(135deg,var(--pri),var(--accent));color:#fff;padding:16px 48px;border-radius:12px;font-size:17px;font-weight:700;text-decoration:none;transition:.3s}
+.btn-big:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.4)}
+.btn-out{display:inline-block;border:2px solid rgba(255,255,255,.2);color:#fff;padding:14px 36px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;transition:.3s;margin-left:12px}
+.btn-out:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.05)}
+
+/* FOOTER */
+.footer{background:#080e1e;color:var(--txt3);padding:32px 48px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+
+/* ANIM */
+.fade{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}.fade.vis{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.g2{grid-template-columns:1fr;gap:32px}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  .slide{padding:60px 20px}.slide h1{font-size:32px}.slide h2{font-size:28px}
+  .g3,.g4,.g6{grid-template-columns:1fr 1fr}
+  .hero-nums{flex-direction:column;gap:16px}
+  .nav{padding:10px 16px}
+  .cta-contacts{flex-direction:column;gap:24px}
+  .footer{flex-direction:column;gap:12px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#" class="nav-brand">
+    <div class="nav-logo">A</div>
+    Aspersio
+    <span class="nav-hub">Резидент AstanaHub</span>
+  </a>
+  <a href="#contact" class="nav-cta">Обсудить партнёрство</a>
+</nav>
+
+<!-- ======== 1. HERO ======== -->
+<section class="slide slide-dark" style="padding-top:100px">
+  <div class="g2">
+    <div>
+      <div class="tag tag-dark">Предложение о партнёрстве</div>
+      <h1><span class="hl">Aspersio</span> &times; Нейрон</h1>
+      <p class="sub sub-dim">IT-компания полного цикла. Предлагаем погрузиться в бизнес-процессы клиники и разработать комплекс IT-решений под ваши задачи.</p>
+      <div class="hero-nums">
+        <div class="hero-num"><div class="val">5+</div><div class="lbl">крупных проектов</div></div>
+        <div class="hero-num"><div class="val">20+</div><div class="lbl">сайтов</div></div>
+        <div class="hero-num"><div class="val">2</div><div class="lbl">года на рынке</div></div>
+      </div>
+    </div>
+    <div class="fade">
+      <!-- Visual: what we cover -->
+      <div class="panel panel-dark">
+        <div class="panel-hdr"><span class="panel-title" style="color:#fff">Наши компетенции</span><span class="badge badge-g">Полный цикл</span></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Веб-разработка</span><span class="prog-val" style="color:#818cf8">Сайты / SPA / Порталы</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:95%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Мобильные приложения</span><span class="prog-val" style="color:#22d3ee">iOS / Android</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:88%;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>CRM и интеграции</span><span class="prog-val" style="color:#34d399">Kaspi / 1С / eGov</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Telegram-боты</span><span class="prog-val" style="color:#fbbf24">Автоматизация</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:85%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>UI/UX дизайн</span><span class="prog-val" style="color:#f472b6">Интерфейсы</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:90%;background:linear-gradient(90deg,#ec4899,#f472b6)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Видео-аналитика</span><span class="prog-val" style="color:#a78bfa">AI / Распознавание</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 2. ЧТО МЫ ДЕЛАЕМ (услуги — визуально) ======== -->
+<section class="slide slide-accent">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-dark">Услуги</div>
+    <h2 style="color:#fff">Полный спектр IT-решений</h2>
+  </div>
+  <div class="g6 fade">
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f310;</div>
+      <h4>Веб-разработка</h4>
+      <p>Лендинги, корпоративные сайты, интернет-магазины, веб-порталы</p>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f4f1;</div>
+      <h4>Мобильные приложения</h4>
+      <p>Нативные и кроссплатформенные решения для iOS и Android</p>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f916;</div>
+      <h4>Telegram-боты</h4>
+      <p>Автоматизация продаж, поддержки и внутренних коммуникаций</p>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f3a8;</div>
+      <h4>UI/UX дизайн</h4>
+      <p>Проектирование интерфейсов, повышающих конверсию</p>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f517;</div>
+      <h4>CRM и интеграции</h4>
+      <p>Kaspi, 1С, eGov, платёжные API, кастомные CRM</p>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">&#x1f4f9;</div>
+      <h4>Видео-аналитика</h4>
+      <p>Распознавание, мониторинг, AI-решения под задачи</p>
+    </div>
+  </div>
+  <div class="logos fade">
+    <div class="logo-pill">Evimiz</div>
+    <div class="logo-pill">Samal Water</div>
+    <div class="logo-pill">Спутник</div>
+    <div class="logo-pill">Ростелеком</div>
+    <div class="logo-pill">Атырау ДС</div>
+    <div class="logo-pill">Костанай БЖ</div>
+  </div>
+</section>
+
+<!-- ======== 3. ПРОБЛЕМЫ БИЗНЕСА (без IT-партнёра) ======== -->
+<section class="slide slide-alt">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-light">Проблематика</div>
+    <h2>Без IT-партнёра бизнес теряет</h2>
+  </div>
+  <div class="g3 fade">
+    <div class="prob">
+      <div class="p-icon">&#x1f50d;</div>
+      <div class="p-val">0</div>
+      <div class="p-lbl">прозрачности<br>владелец не видит реальную картину</div>
+    </div>
+    <div class="prob">
+      <div class="p-icon">&#x23f0;</div>
+      <div class="p-val">60+ ч/мес</div>
+      <div class="p-lbl">ручной работы<br>рутина, которую можно автоматизировать</div>
+    </div>
+    <div class="prob">
+      <div class="p-icon">&#x1f4b8;</div>
+      <div class="p-val">~15%</div>
+      <div class="p-lbl">потерь выручки<br>неконтролируемые финансовые потоки</div>
+    </div>
+    <div class="prob">
+      <div class="p-icon">&#x1f4c9;</div>
+      <div class="p-val">20%</div>
+      <div class="p-lbl">неявок клиентов<br>нет автоматических напоминаний</div>
+    </div>
+    <div class="prob">
+      <div class="p-icon">&#x1f4cb;</div>
+      <div class="p-val">Excel</div>
+      <div class="p-lbl">вместо системы<br>данные разрозненны, теряются</div>
+    </div>
+    <div class="prob">
+      <div class="p-icon">&#x1f4ca;</div>
+      <div class="p-val">На глаз</div>
+      <div class="p-lbl">принимаются решения<br>нет аналитики и данных</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 4. НАШ ПОДХОД — ПОГРУЖЕНИЕ ======== -->
+<section class="slide slide-dark">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-dark">Наш подход</div>
+    <h2 style="color:#fff">Сначала понять, потом предложить</h2>
+    <p class="sub sub-dim center">Мы не продаём готовый продукт. Мы погружаемся в ваш бизнес и находим точки, где IT даст максимальный эффект.</p>
+  </div>
+  <div class="g3 fade">
+    <div class="approach-card" data-num="01">
+      <div class="ac-icon">&#x1f50e;</div>
+      <h4>Погружение в процессы</h4>
+      <p>Изучаем как работает клиника изнутри: от записи до закрытия смены. Находим узкие места и точки потерь.</p>
+      <div class="ac-tags">
+        <span class="ac-tag">Интервью</span>
+        <span class="ac-tag">Наблюдение</span>
+        <span class="ac-tag">Аудит</span>
+      </div>
+    </div>
+    <div class="approach-card" data-num="02">
+      <div class="ac-icon">&#x1f4a1;</div>
+      <h4>Проработанные предложения</h4>
+      <p>На основе аудита формируем конкретные IT-решения с оценкой эффекта, сроков и бюджета для каждого.</p>
+      <div class="ac-tags">
+        <span class="ac-tag">Roadmap</span>
+        <span class="ac-tag">ROI-оценка</span>
+        <span class="ac-tag">Приоритизация</span>
+      </div>
+    </div>
+    <div class="approach-card" data-num="03">
+      <div class="ac-icon">&#x1f680;</div>
+      <h4>Поэтапная реализация</h4>
+      <p>Реализуем решения итерациями — от самых критичных к менее срочным. Каждая итерация — измеримый результат.</p>
+      <div class="ac-tags">
+        <span class="ac-tag">Итерации</span>
+        <span class="ac-tag">Быстрые победы</span>
+        <span class="ac-tag">Масштабирование</span>
+      </div>
+    </div>
+  </div>
+  <!-- Visual: process flow -->
+  <div style="max-width:900px;margin:48px auto 0;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap" class="fade">
+    <div style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:12px;padding:16px 20px;text-align:center;flex:1;min-width:140px">
+      <div style="font-size:24px;margin-bottom:4px">&#x1f3e5;</div>
+      <div style="font-size:12px;font-weight:700;color:#a5b4fc">Ваш бизнес</div>
+    </div>
+    <div style="color:var(--accent);font-size:20px;padding:0 10px;font-weight:700">&#x2192;</div>
+    <div style="background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);border-radius:12px;padding:16px 20px;text-align:center;flex:1;min-width:140px">
+      <div style="font-size:24px;margin-bottom:4px">&#x1f50e;</div>
+      <div style="font-size:12px;font-weight:700;color:#22d3ee">Аудит Aspersio</div>
+    </div>
+    <div style="color:var(--accent);font-size:20px;padding:0 10px;font-weight:700">&#x2192;</div>
+    <div style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:16px 20px;text-align:center;flex:1;min-width:140px">
+      <div style="font-size:24px;margin-bottom:4px">&#x1f4cb;</div>
+      <div style="font-size:12px;font-weight:700;color:#34d399">IT-стратегия</div>
+    </div>
+    <div style="color:var(--accent);font-size:20px;padding:0 10px;font-weight:700">&#x2192;</div>
+    <div style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:16px 20px;text-align:center;flex:1;min-width:140px">
+      <div style="font-size:24px;margin-bottom:4px">&#x2699;&#xfe0f;</div>
+      <div style="font-size:12px;font-weight:700;color:#fbbf24">Реализация</div>
+    </div>
+    <div style="color:var(--accent);font-size:20px;padding:0 10px;font-weight:700">&#x2192;</div>
+    <div style="background:rgba(236,72,153,.15);border:1px solid rgba(236,72,153,.3);border-radius:12px;padding:16px 20px;text-align:center;flex:1;min-width:140px">
+      <div style="font-size:24px;margin-bottom:4px">&#x1f4c8;</div>
+      <div style="font-size:12px;font-weight:700;color:#f472b6">Рост бизнеса</div>
+    </div>
+  </div>
+  <!-- Before / After -->
+  <div class="g2 fade" style="max-width:900px;margin:48px auto 0;gap:24px">
+    <div class="panel panel-dark">
+      <div class="panel-hdr"><span class="panel-title" style="color:var(--red)">Сейчас</span></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Автоматизация</span><span class="prog-val" style="color:var(--red)">~10%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:10%;background:var(--red)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Прозрачность</span><span class="prog-val" style="color:var(--red)">~25%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:25%;background:var(--red)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Цифровые каналы</span><span class="prog-val" style="color:var(--orange)">Базовые</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:30%;background:var(--orange)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Аналитика</span><span class="prog-val" style="color:var(--red)">0%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:2%;background:var(--red)"></div></div></div>
+    </div>
+    <div class="panel panel-dark" style="border-color:rgba(16,185,129,.3)">
+      <div class="panel-hdr"><span class="panel-title" style="color:var(--green)">С Aspersio</span></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Автоматизация</span><span class="prog-val" style="color:var(--green)">95%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:95%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Прозрачность</span><span class="prog-val" style="color:var(--green)">100%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:100%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Цифровые каналы</span><span class="prog-val" style="color:var(--green)">Полный охват</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:95%;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div></div></div>
+      <div class="prog"><div class="prog-top" style="color:#fff"><span>Аналитика</span><span class="prog-val" style="color:var(--green)">Real-time</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 5. ЧТО МОЖЕМ ДАТЬ НЕЙРОНУ (потенциальные решения) ======== -->
+<section class="slide">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-light">Потенциал</div>
+    <h2>Что Aspersio может дать Нейрону</h2>
+    <p class="sub sub-dark center">Предварительные направления — финальный список сформируем после погружения в ваши процессы</p>
+  </div>
+  <div class="g3 fade">
+    <div class="pot-card c1">
+      <div class="pot-icon">&#x1f4ca;</div>
+      <h4>CRM-платформа</h4>
+      <p>Единая система: расписание, мед. карты, онлайн-запись, финансы, аналитика</p>
+    </div>
+    <div class="pot-card c2">
+      <div class="pot-icon">&#x1f4f1;</div>
+      <h4>Мобильное приложение</h4>
+      <p>Для пациентов: запись, история, результаты анализов, push-уведомления</p>
+    </div>
+    <div class="pot-card c3">
+      <div class="pot-icon">&#x1f916;</div>
+      <h4>Telegram / WhatsApp боты</h4>
+      <p>Запись на приём, напоминания, FAQ, получение результатов анализов</p>
+    </div>
+    <div class="pot-card c4">
+      <div class="pot-icon">&#x1f310;</div>
+      <h4>Сайт клиники</h4>
+      <p>Современный сайт с онлайн-записью, врачами, услугами и SEO</p>
+    </div>
+    <div class="pot-card c5">
+      <div class="pot-icon">&#x1f4e3;</div>
+      <h4>Автоматизация маркетинга</h4>
+      <p>Автоворонки, рассылки, ретаргетинг, аналитика рекламных каналов, ROI каждой кампании</p>
+    </div>
+    <div class="pot-card c6">
+      <div class="pot-icon">&#x1f517;</div>
+      <h4>Интеграции</h4>
+      <p>1С, ОСМС/ФСМС, лаборатории, Kaspi Pay, WhatsApp Business API</p>
+    </div>
+  </div>
+  <div style="max-width:800px;margin:40px auto 0;text-align:center;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(6,182,212,.06));border:1px solid rgba(99,102,241,.15);border-radius:16px;padding:24px" class="fade">
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">Это предварительный список</div>
+    <div style="font-size:13px;color:var(--txt2)">После аудита бизнес-процессов мы сформируем точную IT-стратегию с приоритизацией, сроками и оценкой эффекта каждого решения</div>
+  </div>
+</section>
+
+<!-- ======== 6. ПРОЗРАЧНОСТЬ ДЛЯ ВЛАДЕЛЬЦА ======== -->
+<section class="slide slide-green">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-green">Ключевая ценность</div>
+    <h2 style="color:#fff">Полная прозрачность для владельцев</h2>
+    <p class="sub sub-dim center">Всё, что происходит в клинике — доступно в реальном времени, из любой точки мира</p>
+  </div>
+  <div class="g2 fade" style="gap:32px">
+    <div class="panel panel-dark">
+      <div class="panel-hdr"><span class="panel-title" style="color:#fff">Дашборд владельца — Live</span><span class="badge badge-g">Сверено</span></div>
+      <div class="kpi-row" style="grid-template-columns:1fr 1fr">
+        <div class="kpi kpi-d"><div class="kv" style="color:#10b981">₸18.4M</div><div class="kl">Выручка / мес</div><div class="kc kc-up">+15%</div></div>
+        <div class="kpi kpi-d"><div class="kv" style="color:#06b6d4">2 847</div><div class="kl">Пациентов</div><div class="kc kc-up">+12%</div></div>
+      </div>
+      <div class="bars" id="ownerChart"></div>
+      <div class="bar-labels"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+    </div>
+    <div>
+      <div class="panel panel-dark" style="margin-bottom:16px">
+        <div class="panel-hdr"><span class="panel-title" style="color:#fff">Аудит операций</span><span class="badge badge-b">128 логов</span></div>
+        <table class="mt" style="color:#fff">
+          <tr><td style="color:var(--txt3)">09:45</td><td>Возврат ₸15 000</td><td><span class="st st-w">Контроль</span></td></tr>
+          <tr><td style="color:var(--txt3)">09:30</td><td>Изменение цены</td><td><span class="st st-i">Лог</span></td></tr>
+          <tr><td style="color:var(--txt3)">09:15</td><td>Отмена записи</td><td><span class="st st-e">Лог</span></td></tr>
+          <tr><td style="color:var(--txt3)">09:00</td><td>Вход: Директор</td><td><span class="st st-ok">OK</span></td></tr>
+        </table>
+      </div>
+      <div class="panel panel-dark">
+        <div class="panel-hdr"><span class="panel-title" style="color:#fff">Загрузка врачей</span></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Др. Сериков</span><span class="prog-val">95%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:95%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Др. Касымова</span><span class="prog-val">88%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:88%;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div></div></div>
+        <div class="prog"><div class="prog-top" style="color:#fff"><span>Др. Омарова</span><span class="prog-val">92%</span></div><div class="prog-bar prog-bar-d"><div class="prog-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======== 8. ПОЧЕМУ ASPERSIO ======== -->
+<section class="slide slide-dark">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="tag tag-dark">Почему мы</div>
+    <h2 style="color:#fff">Преимущества Aspersio</h2>
+  </div>
+  <div class="g4 fade">
+    <div class="stat-pill"><div class="sp-v" style="background:linear-gradient(135deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent">14</div><div class="sp-l">дней — средний срок</div></div>
+    <div class="stat-pill"><div class="sp-v" style="background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Fix</div><div class="sp-l">фиксированный бюджет</div></div>
+    <div class="stat-pill"><div class="sp-v" style="font-size:28px;background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent">AstanaHub</div><div class="sp-l">резидент IT-хаба</div></div>
+    <div class="stat-pill"><div class="sp-v" style="background:linear-gradient(135deg,#ec4899,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">24/7</div><div class="sp-l">поддержка после запуска</div></div>
+  </div>
+  <div class="g3 fade" style="margin-top:32px">
+    <div class="approach-card" data-num="">
+      <div class="ac-icon">&#x1f3af;</div>
+      <h4>Не шаблоны, а под вас</h4>
+      <p>Каждое решение проектируется под конкретные процессы клиники Нейрон</p>
+    </div>
+    <div class="approach-card" data-num="">
+      <div class="ac-icon">&#x1f4ac;</div>
+      <h4>Прямая коммуникация</h4>
+      <p>Работаете с командой разработки напрямую. Еженедельные отчёты.</p>
+    </div>
+    <div class="approach-card" data-num="">
+      <div class="ac-icon">&#x1f4b0;</div>
+      <h4>Без скрытых доплат</h4>
+      <p>Фиксированная стоимость каждого этапа. Бюджет — от 300 000 ₸.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======== 9. CTA ======== -->
+<section class="slide slide-accent" id="contact">
+  <div style="max-width:700px;margin:0 auto;text-align:center" class="fade">
+    <div class="tag tag-dark">Следующий шаг</div>
+    <h2 style="color:#fff;font-size:44px;margin-bottom:16px">Давайте встретимся</h2>
+    <p style="color:var(--txt3);font-size:17px;margin-bottom:36px">Мы предлагаем бесплатную встречу — познакомиться, обсудить задачи клиники и наметить план погружения в ваши бизнес-процессы</p>
+    <a href="#" class="btn-big">Назначить встречу</a>
+    <div class="cta-contacts">
+      <div class="cc">
+        <div class="cc-icon">&#x1f4de;</div>
+        <div class="cc-val">+7 705 184 35 39</div>
+        <div class="cc-lbl">Звонок / WhatsApp / Telegram</div>
+      </div>
+      <div class="cc">
+        <div class="cc-icon">&#x1f4e7;</div>
+        <div class="cc-val">aspersiokz@gmail.com</div>
+        <div class="cc-lbl">Email</div>
+      </div>
+      <div class="cc">
+        <div class="cc-icon">&#x1f4cd;</div>
+        <div class="cc-val">Алматы, Казахстан</div>
+        <div class="cc-lbl">Резидент AstanaHub</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--pri),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px">A</div>
+    <span style="color:#fff;font-weight:600">Aspersio</span>
+    <span>| IT Solutions</span>
+  </div>
+  <div>&copy; 2026 Aspersio</div>
+</footer>
+
+<script>
+// Animations
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('vis')})},{threshold:0.08});
+document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'})})});
+
+// Chart builder
+function bars(id,data,colors){
+  const c=document.getElementById(id);if(!c)return;
+  const mx=Math.max(...data);
+  c.innerHTML=data.map((v,i)=>`<div class="bar" style="height:${(v/mx)*100}%;background:${colors[i%colors.length]}"></div>`).join('');
+}
+bars('ownerChart',[705,1010,1245,890,1465,520,180],['#10b981','#34d399','#10b981','#34d399','#10b981','#34d399','#10b981']);
+</script>
+</body>
+</html>
