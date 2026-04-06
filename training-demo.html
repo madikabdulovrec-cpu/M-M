@@ -1354,17 +1354,145 @@ body {
 
 /* Responsive */
 @media(max-width:768px) {
-  .stats-row { grid-template-columns:repeat(2,1fr); margin:-40px 20px 30px; }
-  .days-grid { grid-template-columns:repeat(2,1fr); }
-  .rewards-grid { grid-template-columns:1fr; }
-  .lesson-content { grid-template-columns:1fr; }
-  .days-section, .progress-section, .leaderboard-section,
-  .lesson-header, .lesson-back, .assignment-section { padding-left:20px; padding-right:20px; }
-  .dash-header { padding:20px 20px 70px; }
-  .wallet-card { margin:0 20px 30px; }
-  .rewards-grid { padding:0 20px; }
-  .profile-stats { padding:0 20px; }
-  .profile-section { padding:0 20px; }
+  /* Login */
+  .login-box { width:90vw; padding:35px 24px; }
+  .login-box .logo { font-size:26px; }
+  .role-toggle { flex-direction:column; gap:4px; }
+  .role-btn { padding:10px 14px; font-size:13px; }
+
+  /* Mission banner */
+  .mission-banner { padding:20px 16px 24px; }
+  .mission-content { margin:0 0 20px; }
+  .mission-title { font-size:20px; }
+  .mission-desc { font-size:13px; }
+  .values-row { gap:6px; flex-wrap:wrap; }
+  .value-tag { font-size:11px; padding:6px 10px; }
+  .top-avatar { width:36px; height:36px; font-size:14px; }
+  .mission-top .logo { font-size:16px; }
+
+  /* User hero card */
+  .user-card-section { padding:20px 16px 0; }
+  .user-hero-card { flex-direction:column; }
+  .user-hero-left { padding:20px 16px; gap:14px; }
+  .user-hero-avatar { width:52px; height:52px; font-size:22px; }
+  .user-hero-name { font-size:16px; }
+  .user-hero-stats { width:100%; }
+  .user-hero-stat { padding:16px 12px; min-width:0; flex:1; }
+  .uhs-value { font-size:20px; }
+
+  /* Stats row */
+  .stats-row { grid-template-columns:repeat(2,1fr); margin:0 16px; gap:10px; padding-top:20px; }
+  .stat-card { padding:16px; }
+  .stat-card .stat-icon { width:34px; height:34px; }
+  .stat-value { font-size:20px; }
+
+  /* Progress */
+  .progress-section { padding:0 16px; margin-bottom:24px; }
+
+  /* Days grid */
+  .days-section { padding:0 16px; }
+  .days-grid { grid-template-columns:1fr; }
+  .day-card { padding:18px 16px; }
+
+  /* Leaderboard */
+  .leaderboard-section { padding:0 16px; margin-top:24px; }
+
+  /* Lesson screen */
+  .lesson-header { padding:20px 16px 24px; }
+  .lesson-header h1 { font-size:18px; }
+  .lesson-back { padding:14px 16px; }
+  .lesson-content { grid-template-columns:1fr; padding:0 16px; gap:16px; }
+  .video-area { min-height:180px; border-radius:16px; }
+  .assignment-section { padding:0 16px; }
+  .assignment-card { padding:20px 16px; }
+  .assignment-card h3 { font-size:16px; }
+
+  /* Quiz */
+  .quiz-section { padding:0 16px; }
+  .quiz-question { padding:16px; }
+  .quiz-opt { padding:8px 10px; font-size:12px; }
+
+  /* Feedback */
+  .feedback-section { padding:0 16px; }
+  .pending-banner { margin:16px; padding:12px 16px; font-size:13px; }
+
+  /* Rewards */
+  .rewards-header { padding:20px 16px 30px; }
+  .rewards-header h1 { font-size:20px; }
+  .wallet-card { margin:0 16px 24px; padding:24px 20px; }
+  .rewards-grid { padding:0 16px; grid-template-columns:1fr; }
+  .reward-card { padding:24px 16px; }
+
+  /* Profile */
+  .profile-header { padding:30px 16px 24px; }
+  .profile-header h1 { font-size:20px; }
+  .profile-avatar-lg { width:70px; height:70px; font-size:28px; }
+  .profile-stats { padding:0 16px; gap:10px; }
+  .profile-section { padding:0 16px; }
+  .cert-status-card { margin:16px; padding:16px; gap:12px; flex-wrap:wrap; }
+  .cert-status-icon { font-size:28px; }
+  .deadline-card { margin:12px 16px; flex-direction:column; gap:10px; align-items:flex-start; }
+
+  /* Admin */
+  .admin-header { padding:20px 16px 24px; }
+  .admin-header h1 { font-size:18px; }
+  .admin-stats { grid-template-columns:repeat(2,1fr); padding:0 16px; gap:10px; }
+  .admin-stat-card { padding:14px; }
+  .asc-num { font-size:22px; }
+  .admin-alerts { padding:0 16px; }
+  .admin-section { padding:0 16px; }
+  .admin-section-header { flex-direction:column; align-items:flex-start; }
+  .admin-toolbar { width:100%; }
+  .admin-filter { flex:1; min-width:0; font-size:11px; padding:6px 8px; }
+  .admin-export-btn { font-size:11px; padding:6px 12px; }
+  .admin-chart { height:120px; padding:12px; gap:6px; }
+  .intern-table { font-size:12px; }
+  .intern-table th, .intern-table td { padding:8px 6px; }
+  /* Hide some columns on mobile */
+  .intern-table th:nth-child(4), .intern-table td:nth-child(4),
+  .intern-table th:nth-child(5), .intern-table td:nth-child(5),
+  .intern-table th:nth-child(7), .intern-table td:nth-child(7) { display:none; }
+  .intern-detail { padding:20px 16px; }
+  .intern-detail-header { flex-direction:column; text-align:center; gap:12px; }
+  .intern-detail-stats { grid-template-columns:repeat(2,1fr); }
+  .day-progress-item { padding:10px 12px; }
+  .dpi-details { flex-direction:column; gap:8px; align-items:flex-start; }
+
+  /* Welcome modal */
+  .welcome-modal { padding:35px 24px; width:92vw; }
+  .welcome-icon { font-size:48px; }
+  .welcome-modal h2 { font-size:18px; }
+
+  /* Certificate */
+  .cert-card { width:95vw; }
+  .cert-border { padding:24px 16px; margin:8px; }
+  .cert-name { font-size:20px; }
+  .cert-stats { gap:20px; }
+  .cert-stats strong { font-size:18px; }
+  .cert-actions { flex-direction:column; gap:8px; padding:0 16px; }
+  .cert-btn { width:100%; text-align:center; }
+
+  /* Bottom nav */
+  .bottom-nav { gap:2px; padding:8px 8px; }
+  .nav-btn { font-size:10px; padding:6px 8px; gap:2px; min-width:0; }
+  .nav-btn .nav-icon { font-size:18px; }
+
+  /* Btn logout */
+  .btn-logout { width:calc(100% - 32px); margin:24px 16px 0; }
+
+  /* Toast */
+  .toast { top:10px; right:10px; left:10px; max-width:none; padding:12px 16px; font-size:13px; }
+}
+
+@media(max-width:400px) {
+  .user-hero-stat { padding:12px 8px; }
+  .uhs-value { font-size:16px; }
+  .stats-row { grid-template-columns:1fr 1fr; gap:8px; }
+  .admin-stats { grid-template-columns:1fr 1fr; }
+  .intern-detail-stats { grid-template-columns:1fr 1fr; }
+  .cert-border { padding:20px 12px; }
+  .cert-name { font-size:16px; }
+  .cert-logo { font-size:22px; }
 }
 </style>
 </head>
