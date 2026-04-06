@@ -1,0 +1,2992 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&M Fabrica — Обучение стажёров</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Space Grotesk',sans-serif;
+  background:#EDF4FC;
+  color:#1A1A1A;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+:root {
+  --yellow: #FFE600;
+  --pink: #FF2D7B;
+  --blue: #2D5BFF;
+  --green: #00E676;
+  --black: #1A1A1A;
+  --white: #FFFFFF;
+  --cream: #EDF4FC;
+  --gray: #E8EFF8;
+  --border: 2px solid rgba(0,0,0,0.06);
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 35px rgba(0,0,0,0.1);
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 50px;
+}
+
+/* ========== LOGIN SCREEN ========== */
+.screen { display:none; min-height:100vh; }
+.screen.active { display:block; }
+
+.login-screen {
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh;
+  background: var(--yellow);
+  position:relative;
+  overflow:hidden;
+}
+.login-screen::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events:none;
+}
+.login-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 50px 40px;
+  width: 460px;
+  text-align: center;
+  border: 2px solid var(--black);
+  box-shadow: var(--shadow-lg);
+  position:relative;
+  z-index:1;
+}
+.login-box .logo {
+  font-family:'Unbounded',sans-serif;
+  font-size:32px; font-weight:800;
+  margin-bottom:8px;
+  letter-spacing:0.05em;
+}
+.login-box .logo span { color:var(--pink); }
+.login-box .subtitle {
+  color:#888; font-size:14px; margin-bottom:35px;
+  font-weight:500;
+}
+.login-box input {
+  width:100%; padding:16px 20px;
+  background:var(--gray); border:2px solid rgba(0,0,0,0.08);
+  border-radius:14px; color:var(--black);
+  font-size:15px; font-family:'Space Grotesk',sans-serif;
+  margin-bottom:14px; outline:none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.login-box input:focus {
+  border-color:var(--pink);
+  box-shadow: 0 0 0 3px rgba(255,45,123,0.1);
+}
+.login-box input::placeholder { color:#aaa; }
+.login-box .code-input {
+  letter-spacing:8px; text-align:center; font-size:20px; font-weight:600;
+}
+.login-box .btn-enter {
+  width:100%; padding:16px;
+  background: var(--pink); color:#fff;
+  border:2px solid var(--black); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif;
+  font-size:14px; font-weight:600;
+  cursor:pointer; margin-top:10px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  letter-spacing:0.05em;
+}
+.login-box .btn-enter:hover {
+  transform:translate(-2px,-2px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+}
+/* Role toggle */
+.role-toggle {
+  display:flex; gap:0; margin-bottom:24px;
+  background:var(--gray); border-radius:var(--radius-pill);
+  padding:4px; border:2px solid rgba(0,0,0,0.06);
+}
+.role-btn {
+  flex:1; padding:12px 16px;
+  background:transparent; border:none; border-radius:var(--radius-pill);
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
+  color:#999; cursor:pointer; transition:all 0.3s;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.role-btn.active {
+  background:var(--white); color:var(--black);
+  box-shadow:var(--shadow-sm);
+}
+.role-btn:hover:not(.active) { color:var(--black); }
+.role-btn .role-icon { font-size:16px; }
+
+/* Admin role active state */
+.role-btn.admin-active {
+  background:linear-gradient(135deg, var(--blue), #1a3fcc);
+  color:#fff; box-shadow:var(--shadow-sm);
+}
+
+.login-box .hint { color:#aaa; font-size:12px; margin-top:15px; }
+.login-box .login-error {
+  color:var(--pink); font-size:13px; font-weight:600;
+  margin-top:10px; display:none;
+}
+
+/* Floating shapes */
+.float-shape {
+  position:absolute; border-radius:50%; z-index:0;
+}
+.float-shape.s1 {
+  width:180px; height:180px; background:var(--pink);
+  top:-40px; right:-40px; opacity:0.6;
+}
+.float-shape.s2 {
+  width:120px; height:120px; background:var(--blue);
+  bottom:-30px; left:-30px; opacity:0.5;
+}
+.float-shape.s3 {
+  width:80px; height:80px; background:var(--green);
+  top:50%; right:15%; opacity:0.4;
+}
+
+/* ========== TOAST ========== */
+.toast {
+  position:fixed; top:30px; right:30px; z-index:300;
+  background:var(--white); border:2px solid var(--black);
+  border-radius:var(--radius); padding:16px 24px;
+  box-shadow: var(--shadow-lg);
+  display:flex; align-items:center; gap:12px;
+  font-weight:600; font-size:14px;
+  transform:translateX(120%); transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);
+  max-width:380px;
+}
+.toast.show { transform:translateX(0); }
+.toast .toast-icon { font-size:24px; flex-shrink:0; }
+.toast .toast-text { line-height:1.3; }
+.toast .toast-text small { display:block; font-weight:500; color:#888; font-size:12px; margin-top:2px; }
+
+/* ========== DASHBOARD ========== */
+.dashboard {
+  background: var(--cream);
+  padding-bottom: 100px;
+}
+
+/* -- Mission Banner -- */
+.mission-banner {
+  background: var(--yellow);
+  padding: 30px 40px 35px;
+  position: relative;
+  overflow: hidden;
+  border-bottom:2px solid var(--black);
+}
+.mission-banner::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 18px 18px;
+  pointer-events:none;
+}
+.mission-top {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:30px; position:relative; z-index:1;
+}
+.mission-top .logo {
+  font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800;
+  color:var(--black); letter-spacing:0.05em;
+}
+.mission-top .logo-sub {
+  font-size:11px; font-weight:600; color:rgba(0,0,0,0.45);
+  letter-spacing:0.08em; text-transform:uppercase; margin-top:2px;
+}
+.mission-top .top-avatar {
+  width:42px; height:42px; border-radius:50%;
+  background:var(--white); color:var(--pink);
+  border:2px solid var(--black);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:16px;
+  box-shadow: var(--shadow-sm); cursor:pointer;
+}
+.mission-content {
+  position:relative; z-index:1;
+  max-width:700px;
+}
+.mission-label {
+  display:inline-block; background:var(--white); color:var(--black);
+  font-family:'Unbounded',sans-serif; font-size:10px; font-weight:600;
+  padding:5px 14px; border-radius:var(--radius-pill);
+  border:2px solid var(--black); box-shadow:var(--shadow-sm);
+  letter-spacing:0.12em; text-transform:uppercase;
+  margin-bottom:16px;
+}
+.mission-title {
+  font-family:'Unbounded',sans-serif; font-size:24px; font-weight:800;
+  color:var(--black); line-height:1.25; margin-bottom:14px;
+}
+.mission-title em {
+  font-style:normal;
+  background: linear-gradient(180deg, transparent 55%, rgba(255,45,123,0.25) 55%);
+}
+.mission-desc {
+  font-size:15px; color:rgba(0,0,0,0.6); line-height:1.6; font-weight:500;
+  max-width:600px;
+}
+.values-row {
+  display:flex; gap:12px; margin-top:22px; flex-wrap:wrap;
+  position:relative; z-index:1;
+}
+.value-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--white); border:2px solid rgba(0,0,0,0.08);
+  border-radius:var(--radius-pill); padding:8px 16px;
+  font-size:13px; font-weight:600; color:var(--black);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+.value-tag:hover { transform:translateY(-2px); }
+.value-tag .vt-icon { font-size:16px; }
+
+/* -- User Card -- */
+.user-card-section {
+  padding:30px 40px 0;
+}
+.user-hero-card {
+  background:var(--white); border:2px solid var(--black);
+  border-radius:var(--radius-lg); padding:0;
+  box-shadow: var(--shadow-lg);
+  display:flex; overflow:hidden;
+}
+.user-hero-left {
+  flex:1; padding:32px 30px;
+  display:flex; align-items:center; gap:20px;
+  cursor:pointer;
+}
+.user-hero-avatar {
+  width:72px; height:72px; border-radius:50%;
+  background:var(--pink); color:#fff;
+  border:3px solid var(--black);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:28px;
+  box-shadow: var(--shadow);
+  flex-shrink:0;
+}
+.user-hero-info {}
+.user-hero-name {
+  font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800;
+  color:var(--black); margin-bottom:4px;
+}
+.user-hero-rank {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,45,123,0.08); color:var(--pink);
+  font-size:12px; font-weight:700; padding:4px 12px;
+  border-radius:var(--radius-pill);
+}
+.user-hero-stats {
+  display:flex; gap:0; margin-left:auto;
+}
+.user-hero-stat {
+  padding:32px 28px; text-align:center;
+  border-left:2px solid rgba(0,0,0,0.06);
+  min-width:120px;
+}
+.user-hero-stat:first-child { border-left:2px solid rgba(0,0,0,0.06); }
+.uhs-value {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+}
+.uhs-label {
+  font-size:11px; color:#999; font-weight:600;
+  margin-top:4px; text-transform:uppercase; letter-spacing:0.05em;
+}
+
+/* Stats Row */
+.stats-row {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  margin:0 40px; position:relative; z-index:2;
+  padding-top:30px;
+}
+.stat-card {
+  background:var(--white); border-radius:var(--radius);
+  padding:22px; border:2px solid rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover {
+  transform:translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.stat-card .stat-icon {
+  width:42px; height:42px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; margin-bottom:12px;
+}
+.stat-card .stat-value {
+  font-family:'Unbounded',sans-serif; font-size:24px; font-weight:800;
+}
+.stat-card .stat-label { color:#888; font-size:12px; margin-top:4px; font-weight:500; }
+
+/* Progress */
+.progress-section { padding:0 40px; margin-bottom:40px; }
+.progress-section h3 {
+  font-family:'Unbounded',sans-serif; font-size:16px; margin-bottom:15px;
+}
+.progress-bar-bg {
+  background:#E8E8E0; border-radius:var(--radius-pill); height:28px; overflow:hidden;
+  position:relative; border:2px solid rgba(0,0,0,0.08);
+}
+.progress-bar-fill {
+  height:100%; border-radius:var(--radius-pill);
+  background: linear-gradient(90deg, var(--yellow), var(--pink));
+  transition: width 0.8s ease;
+  position:relative;
+}
+.progress-bar-fill::after {
+  content:attr(data-percent);
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:12px; font-weight:700; color:var(--black);
+}
+.rank-badges {
+  display:flex; justify-content:space-between; margin-top:10px;
+  font-size:12px; color:#999; font-weight:500;
+}
+.rank-badges span.active-rank { color:var(--pink); font-weight:700; }
+
+/* Days Grid */
+.days-section { padding:0 40px; }
+.days-section h3 {
+  font-family:'Unbounded',sans-serif; font-size:16px; margin-bottom:20px;
+}
+.days-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:16px;
+}
+.day-card {
+  background:var(--white); border-radius:var(--radius); padding:24px 20px;
+  border:2px solid rgba(0,0,0,0.08); cursor:pointer;
+  transition: all 0.3s ease;
+  position:relative; overflow:hidden;
+  box-shadow: var(--shadow);
+}
+.day-card:hover {
+  transform:translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color:var(--pink);
+}
+.day-card.completed {
+  border-color:var(--green);
+  background: linear-gradient(135deg, rgba(0,230,118,0.06), var(--white));
+}
+.day-card.current {
+  border-color:var(--pink);
+  background: linear-gradient(135deg, rgba(255,45,123,0.05), var(--white));
+  animation: currentPulse 2s ease-in-out infinite;
+}
+.day-card.locked {
+  opacity:0.45; cursor:pointer;
+}
+.day-card.locked:hover { transform:translate(-2px,-4px); border-color:var(--blue); box-shadow:var(--shadow-lg); opacity:0.7; }
+
+@keyframes currentPulse {
+  0%,100% { box-shadow: var(--shadow), 0 0 0 0 rgba(255,45,123,0.12); }
+  50% { box-shadow: var(--shadow-lg), 0 0 0 8px rgba(255,45,123,0); }
+}
+
+.day-num {
+  font-family:'Unbounded',sans-serif; font-size:11px; font-weight:600;
+  color:#999; margin-bottom:10px; letter-spacing:0.1em;
+}
+.day-title {
+  font-weight:700; font-size:14px; margin-bottom:12px;
+  line-height:1.3; color:var(--black);
+}
+.day-stars { display:flex; gap:3px; margin-bottom:10px; }
+.day-stars .star { font-size:16px; }
+.day-stars .star.filled { color:var(--yellow); filter:drop-shadow(0 1px 2px rgba(255,230,0,0.5)); }
+.day-stars .star.empty { color:#ddd; }
+
+.day-status {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; font-weight:700; padding:5px 12px;
+  border-radius:var(--radius-pill);
+  letter-spacing:0.02em;
+}
+.day-status.done { background:rgba(0,230,118,0.12); color:#00a854; }
+.day-status.active { background:rgba(255,45,123,0.1); color:var(--pink); }
+.day-status.lock { background:rgba(0,0,0,0.04); color:#bbb; }
+
+.day-badge {
+  position:absolute; top:12px; right:12px;
+  font-size:20px;
+}
+
+/* ========== LESSON SCREEN ========== */
+.lesson-screen { background:var(--cream); padding-bottom:80px; }
+.lesson-back {
+  display:inline-flex; align-items:center; gap:8px;
+  color:#888; font-size:13px; padding:20px 40px;
+  cursor:pointer; text-decoration:none; font-weight:600;
+  transition: color 0.2s;
+}
+.lesson-back:hover { color:var(--pink); }
+
+.lesson-header {
+  padding:0 40px 30px; border-bottom:2px solid rgba(0,0,0,0.06);
+  margin-bottom:30px;
+}
+.lesson-header .day-label {
+  display:inline-block; background:var(--yellow); color:var(--black);
+  font-family:'Unbounded',sans-serif; font-size:11px; font-weight:600;
+  padding:6px 16px; border-radius:var(--radius-pill); margin-bottom:12px;
+  border:2px solid var(--black); box-shadow: var(--shadow-sm);
+  letter-spacing:0.1em;
+}
+.lesson-header h1 {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+  margin-bottom:8px; color:var(--black);
+}
+.lesson-header p { color:#888; font-size:14px; font-weight:500; }
+
+.lesson-content { display:grid; grid-template-columns:2fr 1fr; gap:30px; padding:0 40px; }
+
+.video-area {
+  background:var(--black); border-radius:var(--radius-lg); overflow:hidden;
+  aspect-ratio:16/9; position:relative;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  border:2px solid var(--black); box-shadow: var(--shadow-lg);
+}
+.video-play {
+  width:80px; height:80px; border-radius:50%;
+  background:var(--pink); color:#fff;
+  border:3px solid #fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:30px; cursor:pointer;
+  transition:transform 0.2s, background 0.3s;
+  box-shadow: 0 10px 30px rgba(255,45,123,0.4);
+}
+.video-play:hover { transform:scale(1.1); }
+.video-play.playing { background:var(--green); }
+.video-duration {
+  position:absolute; bottom:15px; right:15px;
+  background:rgba(0,0,0,0.8); color:#fff;
+  padding:6px 12px; border-radius:var(--radius-pill); font-size:12px; font-weight:600;
+}
+.video-progress {
+  position:absolute; bottom:0; left:0; right:0; height:5px;
+  background:rgba(255,255,255,0.15);
+}
+.video-progress-fill {
+  height:100%; background:var(--pink); width:0%;
+  transition: width 0.3s linear;
+}
+.video-title {
+  position:absolute; top:15px; left:15px;
+  background:rgba(0,0,0,0.7); color:#fff;
+  padding:6px 14px; border-radius:var(--radius-pill);
+  font-size:12px; font-weight:600; display:none;
+}
+
+.lesson-sidebar {}
+.sidebar-card {
+  background:var(--white); border-radius:var(--radius); padding:24px;
+  border:2px solid rgba(0,0,0,0.08); margin-bottom:16px;
+  box-shadow: var(--shadow);
+}
+.sidebar-card h4 {
+  font-family:'Unbounded',sans-serif; font-size:13px; margin-bottom:15px;
+}
+.sidebar-card .checklist { list-style:none; }
+.sidebar-card .checklist li {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.06);
+  font-size:13px; color:#666; font-weight:500;
+  cursor:pointer; transition:color 0.2s;
+}
+.sidebar-card .checklist li:last-child { border:none; }
+.sidebar-card .checklist li:hover { color:var(--pink); }
+.sidebar-card .checklist li.checked { color:#00a854; text-decoration:line-through; opacity:0.7; }
+.sidebar-card .checklist .check {
+  width:22px; height:22px; border-radius:6px;
+  border:2px solid #ddd; display:flex;
+  align-items:center; justify-content:center; font-size:12px;
+  flex-shrink:0; transition: all 0.2s;
+}
+.sidebar-card .checklist .check.done {
+  background:var(--green); border-color:var(--green); color:#fff;
+}
+.sidebar-card .checklist .material-link {
+  border:none; width:auto; height:auto;
+  background:none; font-size:16px;
+}
+
+/* Assignment */
+.assignment-section {
+  margin-top:30px; padding:0 40px;
+}
+.assignment-card {
+  background: var(--white);
+  border:2px solid var(--black); border-radius:var(--radius-lg); padding:30px;
+  box-shadow: var(--shadow-lg);
+}
+.assignment-card h3 {
+  font-family:'Unbounded',sans-serif; font-size:18px; margin-bottom:10px;
+  display:flex; align-items:center; gap:10px;
+}
+.assignment-card p { color:#888; font-size:14px; margin-bottom:20px; line-height:1.6; font-weight:500; }
+.assignment-card textarea {
+  width:100%; min-height:120px; padding:16px;
+  background:var(--gray); border:2px solid rgba(0,0,0,0.08); border-radius:14px;
+  color:var(--black); font-family:'Space Grotesk',sans-serif; font-size:14px;
+  resize:vertical; outline:none;
+  transition:border-color 0.3s;
+}
+.assignment-card textarea:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(255,45,123,0.08); }
+.assignment-card .btn-submit {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:14px 28px; background:var(--pink); color:#fff;
+  border:2px solid var(--black); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif;
+  font-size:13px; font-weight:600; cursor:pointer;
+  margin-top:15px; transition:all 0.2s;
+  box-shadow: var(--shadow);
+  letter-spacing:0.03em;
+}
+.assignment-card .btn-submit:hover {
+  transform:translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.assignment-card .btn-submit:disabled {
+  background:#ccc; border-color:#aaa; cursor:not-allowed;
+  box-shadow: 2px 2px 0 #aaa;
+}
+
+/* ========== REWARDS SCREEN ========== */
+.rewards-screen { background:var(--cream); padding-bottom:80px; }
+.rewards-header {
+  background: var(--blue);
+  padding:40px; border-radius:0 0 30px 30px;
+  margin-bottom:30px;
+  border-bottom:2px solid var(--black);
+  position:relative; overflow:hidden;
+}
+.rewards-header::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
+  pointer-events:none;
+}
+.rewards-header h1 {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+  margin-bottom:8px; color:#fff; position:relative;
+}
+.rewards-header p { color:rgba(255,255,255,0.7); font-size:14px; font-weight:500; position:relative; }
+
+.wallet-card {
+  background: var(--yellow);
+  border-radius:var(--radius-lg); padding:30px;
+  margin:0 40px 30px; color:var(--black);
+  position:relative; overflow:hidden;
+  border:2px solid var(--black);
+  box-shadow: var(--shadow-lg);
+}
+.wallet-card::before {
+  content:''; position:absolute; top:-30px; right:-30px;
+  width:150px; height:150px; border-radius:50%;
+  background:rgba(255,255,255,0.25);
+}
+.wallet-card::after {
+  content:''; position:absolute; bottom:-20px; left:40%;
+  width:100px; height:100px; border-radius:50%;
+  background:rgba(255,45,123,0.15);
+}
+.wallet-card .wallet-label { font-size:13px; opacity:0.6; margin-bottom:5px; font-weight:600; position:relative; }
+.wallet-card .wallet-balance {
+  font-family:'Unbounded',sans-serif; font-size:48px; font-weight:800;
+  position:relative;
+}
+.wallet-card .wallet-sub { font-size:13px; opacity:0.5; margin-top:5px; font-weight:500; position:relative; }
+
+.rewards-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  padding:0 40px;
+}
+.reward-card {
+  background:var(--white); border-radius:var(--radius); padding:24px;
+  border:2px solid rgba(0,0,0,0.08); transition:all 0.3s;
+  box-shadow: var(--shadow);
+}
+.reward-card:hover {
+  border-color:var(--pink);
+  transform:translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+.reward-card.redeemed {
+  border-color:var(--green); opacity:0.7;
+  background:linear-gradient(135deg, rgba(0,230,118,0.05), var(--white));
+}
+.reward-emoji { font-size:36px; margin-bottom:12px; }
+.reward-name {
+  font-weight:700; font-size:15px; margin-bottom:5px; color:var(--black);
+}
+.reward-desc { color:#888; font-size:12px; margin-bottom:15px; line-height:1.4; font-weight:500; }
+.reward-price {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(255,230,0,0.15); color:#b8a000;
+  padding:8px 14px; border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600;
+  border:1px solid rgba(255,230,0,0.3);
+}
+.reward-btn {
+  display:block; width:100%; padding:12px;
+  background:transparent; border:2px solid rgba(0,0,0,0.1);
+  border-radius:var(--radius-pill); color:var(--black); font-family:'Unbounded',sans-serif;
+  font-size:12px; font-weight:600; cursor:pointer;
+  margin-top:12px; transition:all 0.2s;
+}
+.reward-btn:hover { border-color:var(--pink); color:var(--pink); }
+.reward-btn.affordable {
+  background:var(--pink); color:#fff; border-color:var(--black);
+  box-shadow: var(--shadow-sm);
+}
+.reward-btn.affordable:hover { transform:translateY(-3px); box-shadow: var(--shadow); }
+.reward-btn.redeemed-btn {
+  background:var(--green); color:#fff; border-color:var(--green);
+  cursor:default; box-shadow:none;
+}
+
+/* ========== PROFILE SCREEN ========== */
+.profile-screen { background:var(--cream); padding-bottom:100px; }
+.profile-header {
+  background:var(--pink);
+  padding:40px; text-align:center;
+  border-radius:0 0 30px 30px;
+  border-bottom:2px solid var(--black);
+  position:relative; overflow:hidden;
+}
+.profile-header::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 18px 18px;
+  pointer-events:none;
+}
+.profile-avatar-lg {
+  width:90px; height:90px; border-radius:50%;
+  background:var(--white); color:var(--pink);
+  border:3px solid var(--black);
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:36px;
+  box-shadow: var(--shadow);
+  margin-bottom:12px; position:relative;
+}
+.profile-header h1 {
+  font-family:'Unbounded',sans-serif; font-size:22px; font-weight:800;
+  color:#fff; position:relative; margin-bottom:4px;
+}
+.profile-header .profile-rank-badge {
+  display:inline-block; background:var(--yellow); color:var(--black);
+  font-family:'Unbounded',sans-serif; font-size:11px; font-weight:600;
+  padding:5px 14px; border-radius:var(--radius-pill);
+  border:2px solid var(--black); box-shadow:var(--shadow-sm);
+  position:relative; margin-top:8px;
+}
+.profile-stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  padding:0 40px; margin:-30px auto 30px; max-width:600px;
+  position:relative; z-index:2;
+}
+.profile-stat {
+  background:var(--white); border-radius:var(--radius);
+  padding:20px; text-align:center;
+  border:2px solid rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
+}
+.profile-stat .ps-val {
+  font-family:'Unbounded',sans-serif; font-size:22px; font-weight:800;
+}
+.profile-stat .ps-label { font-size:11px; color:#888; margin-top:4px; font-weight:600; }
+.profile-section {
+  padding:0 40px; margin-bottom:24px;
+}
+.profile-section h3 {
+  font-family:'Unbounded',sans-serif; font-size:15px; margin-bottom:14px;
+}
+.profile-card {
+  background:var(--white); border-radius:var(--radius);
+  border:2px solid rgba(0,0,0,0.08); box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.profile-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 20px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  font-size:14px; font-weight:500;
+}
+.profile-row:last-child { border:none; }
+.profile-row .pr-label { color:#888; }
+.profile-row .pr-value { font-weight:700; }
+.achievement-row {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 20px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.achievement-row:last-child { border:none; }
+.achievement-icon {
+  width:40px; height:40px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.achievement-info { flex:1; }
+.achievement-info .ach-name { font-weight:700; font-size:13px; }
+.achievement-info .ach-desc { font-size:11px; color:#888; margin-top:2px; }
+.btn-logout {
+  display:block; width:calc(100% - 80px); margin:30px 40px 0;
+  padding:14px; background:var(--white);
+  border:2px solid var(--pink); border-radius:var(--radius-pill);
+  color:var(--pink); font-family:'Unbounded',sans-serif;
+  font-size:13px; font-weight:600; cursor:pointer;
+  transition:all 0.2s; text-align:center;
+  box-shadow: var(--shadow-sm);
+}
+.btn-logout:hover {
+  background:var(--pink); color:#fff; border-color:var(--black);
+}
+
+/* ========== ADMIN PANEL ========== */
+.admin-screen { background:var(--cream); padding-bottom:100px; }
+.admin-header {
+  background:linear-gradient(135deg, #1A1A1A 0%, #2d2d2d 100%);
+  padding:30px 40px 35px;
+  border-radius:0 0 30px 30px;
+  border-bottom:2px solid rgba(0,0,0,0.15);
+  position:relative; overflow:hidden;
+}
+.admin-header::before {
+  content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size:18px 18px; pointer-events:none;
+}
+.admin-header-top {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:20px; position:relative; z-index:1;
+}
+.admin-header-top .logo { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800; color:#fff; }
+.admin-header-top .admin-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--pink); color:#fff;
+  padding:6px 16px; border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:10px; font-weight:600;
+  letter-spacing:0.08em;
+}
+.admin-header h1 {
+  font-family:'Unbounded',sans-serif; font-size:22px; font-weight:800;
+  color:#fff; position:relative; z-index:1; margin-bottom:6px;
+}
+.admin-header p { color:rgba(255,255,255,0.5); font-size:13px; font-weight:500; position:relative; z-index:1; }
+
+.admin-stats {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  padding:0 40px; margin-top:24px;
+}
+.admin-stat {
+  background:var(--white); border-radius:var(--radius);
+  padding:20px; border:1px solid rgba(0,0,0,0.06);
+  box-shadow:var(--shadow); text-align:center;
+}
+.admin-stat .as-val {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+}
+.admin-stat .as-label { font-size:11px; color:#999; font-weight:600; margin-top:4px; }
+
+.admin-section { padding:0 40px; margin-top:30px; }
+.admin-section h3 {
+  font-family:'Unbounded',sans-serif; font-size:16px; margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+
+/* Intern table */
+.intern-table {
+  width:100%; border-collapse:separate; border-spacing:0 8px;
+}
+.intern-table th {
+  text-align:left; padding:10px 16px;
+  font-size:11px; font-weight:700; color:#999;
+  text-transform:uppercase; letter-spacing:0.06em;
+}
+.intern-row {
+  background:var(--white); cursor:pointer;
+  transition:all 0.3s;
+  box-shadow:var(--shadow-sm);
+}
+.intern-row:hover {
+  transform:translateY(-2px);
+  box-shadow:var(--shadow);
+}
+.intern-row td {
+  padding:14px 16px; font-size:14px; font-weight:500;
+}
+.intern-row td:first-child { border-radius:var(--radius) 0 0 var(--radius); }
+.intern-row td:last-child { border-radius:0 var(--radius) var(--radius) 0; }
+.intern-avatar-sm {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--pink); color:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:14px;
+  margin-right:10px; vertical-align:middle;
+}
+.intern-name-cell { font-weight:700; }
+.progress-mini {
+  width:100px; height:8px; background:#E8EFF8;
+  border-radius:10px; overflow:hidden; display:inline-block; vertical-align:middle;
+}
+.progress-mini-fill {
+  height:100%; border-radius:10px;
+  background:linear-gradient(90deg, var(--yellow), var(--pink));
+}
+.score-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:4px 10px; border-radius:var(--radius-pill);
+  font-size:12px; font-weight:700;
+}
+.score-badge.high { background:rgba(0,230,118,0.1); color:#00a854; }
+.score-badge.mid { background:rgba(255,230,0,0.15); color:#b8a000; }
+.score-badge.low { background:rgba(255,45,123,0.1); color:var(--pink); }
+.status-dot {
+  display:inline-block; width:8px; height:8px;
+  border-radius:50%; margin-right:6px;
+}
+.status-dot.online { background:var(--green); }
+.status-dot.offline { background:#ccc; }
+
+/* Intern detail modal */
+.intern-detail {
+  padding:30px 40px;
+}
+.intern-detail-header {
+  display:flex; align-items:center; gap:20px;
+  padding-bottom:24px; border-bottom:1px solid rgba(0,0,0,0.06);
+  margin-bottom:24px;
+}
+.intern-detail-avatar {
+  width:64px; height:64px; border-radius:50%;
+  background:var(--pink); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-weight:800; font-size:26px;
+  box-shadow:var(--shadow);
+  flex-shrink:0;
+}
+.intern-detail-info { flex:1; }
+.intern-detail-info h2 {
+  font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800; margin-bottom:4px;
+}
+.intern-detail-info .detail-rank { font-size:13px; color:#999; font-weight:500; }
+.intern-detail-stats {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+  margin-bottom:24px;
+}
+.ids-card {
+  background:var(--cream); border-radius:12px; padding:16px; text-align:center;
+}
+.ids-card .ids-val { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800; }
+.ids-card .ids-label { font-size:10px; color:#999; font-weight:600; margin-top:3px; text-transform:uppercase; }
+
+/* Day progress list in admin */
+.day-progress-list { list-style:none; }
+.day-progress-item {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px; background:var(--white);
+  border-radius:12px; margin-bottom:8px;
+  box-shadow:var(--shadow-sm);
+  transition:all 0.2s;
+}
+.day-progress-item:hover { box-shadow:var(--shadow); }
+.dpi-day {
+  font-family:'Unbounded',sans-serif; font-size:11px; font-weight:600;
+  color:#999; min-width:55px; letter-spacing:0.05em;
+}
+.dpi-title { flex:1; font-weight:600; font-size:13px; }
+.dpi-video {
+  font-size:12px; color:#999; font-weight:500; min-width:90px; text-align:right;
+}
+.dpi-video .watched { color:var(--green); font-weight:700; }
+.dpi-score {
+  min-width:70px; text-align:center;
+}
+.dpi-grade-input {
+  width:50px; padding:6px 8px; text-align:center;
+  border:2px solid rgba(0,0,0,0.08); border-radius:8px;
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;
+  background:var(--cream); outline:none;
+  transition:border-color 0.2s;
+}
+.dpi-grade-input:focus { border-color:var(--pink); }
+.dpi-status { min-width:24px; text-align:center; font-size:18px; }
+.btn-save-grades {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:12px 28px; background:var(--green); color:#fff;
+  border:none; border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:12px; font-weight:600;
+  cursor:pointer; margin-top:16px; transition:all 0.2s;
+  box-shadow:var(--shadow-sm);
+}
+.btn-save-grades:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.admin-note {
+  width:100%; padding:12px 16px; min-height:80px;
+  background:var(--cream); border:2px solid rgba(0,0,0,0.06);
+  border-radius:12px; font-family:'Space Grotesk',sans-serif;
+  font-size:13px; resize:vertical; outline:none; margin-top:12px;
+  transition:border-color 0.2s;
+}
+.admin-note:focus { border-color:var(--blue); }
+
+/* Status badges */
+.status-badge {
+  display:inline-block; padding:4px 10px; border-radius:20px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
+}
+.status-badge.active { background:rgba(0,230,118,0.15); color:#00b862; }
+.status-badge.inactive { background:rgba(255,45,123,0.12); color:var(--pink); }
+
+/* Intern detail stats grid */
+.id-stat {
+  background:var(--cream); border-radius:12px; padding:16px; text-align:center;
+}
+.id-stat-num {
+  font-family:'Unbounded',sans-serif; font-size:18px; font-weight:800; color:var(--black);
+}
+.id-stat-label {
+  font-size:10px; color:#999; font-weight:600; margin-top:3px; text-transform:uppercase;
+}
+
+/* Day progress item layout overrides */
+.day-progress-item {
+  flex-wrap:wrap;
+}
+.dpi-header {
+  display:flex; align-items:center; gap:10px; width:100%;
+}
+.dpi-details {
+  display:flex; align-items:center; gap:16px; width:100%;
+  padding-top:8px; margin-top:4px; border-top:1px solid rgba(0,0,0,0.04);
+}
+.dpi-video {
+  display:flex; align-items:center; gap:8px; flex:1;
+  font-size:12px; color:#888; min-width:auto; text-align:left;
+}
+.dpi-grade {
+  display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
+}
+.day-progress-item.done { background:rgba(0,230,118,0.04); }
+
+/* Admin stat card */
+.admin-stat-card {
+  background:var(--white); border-radius:var(--radius); padding:20px;
+  text-align:center; box-shadow:var(--shadow);
+}
+.asc-num {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+  background:linear-gradient(135deg, var(--pink), var(--blue));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.asc-label { font-size:11px; color:#999; font-weight:600; margin-top:4px; text-transform:uppercase; }
+
+/* ========== WELCOME MODAL ========== */
+.welcome-modal {
+  background:var(--white); border-radius:var(--radius-lg); padding:50px 40px;
+  width:520px; max-width:90vw; text-align:center; position:relative;
+  box-shadow:var(--shadow-lg); border:2px solid var(--black);
+}
+.welcome-step { display:none; }
+.welcome-step.active { display:block; }
+.welcome-icon { font-size:60px; margin-bottom:16px; }
+.welcome-modal h2 { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800; margin-bottom:12px; }
+.welcome-modal p { color:#666; font-size:14px; line-height:1.6; margin-bottom:20px; }
+.welcome-info { text-align:left; margin:20px 0; }
+.wi-item {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--cream); border-radius:12px; margin-bottom:8px;
+  font-size:14px; font-weight:500;
+}
+.wi-item span { font-size:20px; flex-shrink:0; }
+.welcome-steps-list { text-align:left; margin:20px 0; }
+.ws-item {
+  display:flex; align-items:center; gap:14px; padding:14px 16px;
+  border-bottom:1px solid rgba(0,0,0,0.05); font-size:14px; font-weight:500;
+}
+.ws-num {
+  width:28px; height:28px; border-radius:50%; background:var(--pink); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Unbounded',sans-serif; font-size:12px; font-weight:800; flex-shrink:0;
+}
+.welcome-goals { margin:20px 0; }
+.wg-item {
+  display:flex; align-items:center; gap:10px; padding:10px 16px;
+  background:rgba(0,230,118,0.08); border-radius:10px; margin-bottom:8px;
+  font-size:14px; font-weight:600;
+}
+.welcome-btn {
+  width:100%; padding:16px; background:var(--pink); color:#fff;
+  border:2px solid var(--black); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; margin-top:10px; transition:all 0.2s;
+}
+.welcome-btn.green { background:var(--green); }
+.welcome-btn:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.welcome-dots { display:flex; justify-content:center; gap:8px; margin-top:24px; }
+.wdot {
+  width:10px; height:10px; border-radius:50%; background:rgba(0,0,0,0.1);
+  cursor:pointer; transition:all 0.3s;
+}
+.wdot.active { background:var(--pink); width:28px; border-radius:5px; }
+
+/* ========== CERTIFICATE ========== */
+.cert-container { text-align:center; }
+.cert-card {
+  background:#fff; width:680px; max-width:95vw; margin:0 auto 20px;
+  border-radius:8px; overflow:hidden; box-shadow:var(--shadow-lg);
+}
+.cert-border {
+  border:3px solid var(--yellow); margin:12px; padding:40px 30px;
+  position:relative;
+}
+.cert-border::before {
+  content:''; position:absolute; top:6px; left:6px; right:6px; bottom:6px;
+  border:1px solid rgba(255,230,0,0.4); pointer-events:none;
+}
+.cert-header { margin-bottom:30px; }
+.cert-logo {
+  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
+  color:var(--black);
+}
+.cert-logo span { color:var(--pink); }
+.cert-subtitle {
+  font-family:'Unbounded',sans-serif; font-size:10px; font-weight:600;
+  letter-spacing:6px; color:var(--blue); margin-top:4px;
+}
+.cert-label {
+  font-family:'Unbounded',sans-serif; font-size:12px; font-weight:600;
+  letter-spacing:4px; color:#999; margin-bottom:8px;
+}
+.cert-type {
+  font-family:'Unbounded',sans-serif; font-size:18px; font-weight:800;
+  color:var(--pink); margin-bottom:20px;
+}
+.cert-name {
+  font-family:'Unbounded',sans-serif; font-size:26px; font-weight:800;
+  margin:16px 0; padding:12px 0; border-top:2px solid var(--yellow);
+  border-bottom:2px solid var(--yellow);
+}
+.cert-text { color:#666; font-size:13px; line-height:1.8; margin:16px 0 24px; }
+.cert-stats {
+  display:flex; justify-content:center; gap:40px; margin:20px 0;
+}
+.cert-stats div { text-align:center; font-size:12px; color:#888; }
+.cert-stats strong {
+  display:block; font-family:'Unbounded',sans-serif; font-size:22px;
+  font-weight:800; color:var(--black); margin-bottom:2px;
+}
+.cert-date { color:#aaa; font-size:12px; margin-top:16px; }
+.cert-seal {
+  margin-top:16px; font-family:'Unbounded',sans-serif; font-size:11px;
+  font-weight:600; color:var(--blue); letter-spacing:2px;
+}
+.cert-actions { display:flex; gap:12px; justify-content:center; }
+.cert-btn {
+  padding:12px 28px; border-radius:var(--radius-pill); font-family:'Space Grotesk',sans-serif;
+  font-size:14px; font-weight:600; cursor:pointer; border:2px solid rgba(255,255,255,0.3);
+  background:rgba(255,255,255,0.15); color:#fff; transition:all 0.2s;
+}
+.cert-btn.primary { background:var(--green); border-color:var(--green); color:#fff; }
+.cert-btn:hover { transform:translateY(-2px); }
+
+/* ========== QUIZ ========== */
+.quiz-section { padding:0 40px; margin-bottom:24px; }
+.quiz-question {
+  background:var(--white); border-radius:var(--radius); padding:20px;
+  margin-bottom:12px; box-shadow:var(--shadow-sm);
+}
+.quiz-question h4 {
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700;
+  margin-bottom:12px; color:var(--black);
+}
+.quiz-opts { display:flex; flex-direction:column; gap:6px; }
+.quiz-opt {
+  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  background:var(--cream); border-radius:10px; cursor:pointer;
+  font-size:13px; font-weight:500; transition:all 0.2s;
+  border:2px solid transparent;
+}
+.quiz-opt:hover { background:var(--gray); }
+.quiz-opt.selected { border-color:var(--blue); background:rgba(45,91,255,0.06); }
+.quiz-opt.correct { border-color:var(--green); background:rgba(0,230,118,0.08); }
+.quiz-opt.wrong { border-color:var(--pink); background:rgba(255,45,123,0.06); opacity:0.7; }
+.quiz-opt input { display:none; }
+.quiz-radio {
+  width:18px; height:18px; border-radius:50%; border:2px solid #ccc;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition:all 0.2s;
+}
+.quiz-opt.selected .quiz-radio { border-color:var(--blue); background:var(--blue); }
+.quiz-opt.selected .quiz-radio::after { content:''; width:6px; height:6px; border-radius:50%; background:#fff; }
+.quiz-result {
+  margin-top:16px; padding:16px 20px; border-radius:12px;
+  font-weight:600; font-size:14px; text-align:center;
+}
+.quiz-result.pass { background:rgba(0,230,118,0.1); color:#00a854; }
+.quiz-result.fail { background:rgba(255,45,123,0.08); color:var(--pink); }
+.quiz-submit { background:var(--blue); }
+
+/* ========== FEEDBACK ========== */
+.feedback-section { padding:0 40px; margin-bottom:20px; }
+.feedback-content {
+  margin-top:12px; padding:16px; background:var(--cream);
+  border-radius:12px; font-size:14px; line-height:1.6;
+}
+.feedback-score {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'Unbounded',sans-serif; font-size:16px; font-weight:700;
+  margin-bottom:8px;
+}
+.feedback-comment { color:#555; margin-top:8px; font-style:italic; }
+
+/* ========== RETAKE ========== */
+.retake-btn {
+  background:var(--yellow) !important; color:var(--black) !important;
+  border-color:var(--black) !important; margin-top:10px;
+}
+
+/* ========== PENDING BANNER ========== */
+.pending-banner {
+  margin:20px 40px; padding:16px 24px; background:rgba(255,230,0,0.15);
+  border-radius:14px; border:2px solid rgba(255,230,0,0.4);
+  font-weight:600; font-size:14px; color:#8a7000; text-align:center;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.pending-banner span { font-size:20px; }
+
+/* ========== PROFILE: CERT STATUS ========== */
+.cert-status-card {
+  margin:20px 40px; padding:20px; border-radius:var(--radius);
+  display:flex; align-items:center; gap:16px;
+  box-shadow:var(--shadow); background:var(--white);
+}
+.cert-status-icon { font-size:36px; }
+.cert-status-info { flex:1; }
+.cert-status-title { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; }
+.cert-status-desc { font-size:12px; color:#888; margin-top:4px; }
+.cert-status-btn {
+  padding:8px 20px; background:var(--green); color:#fff; border:none;
+  border-radius:var(--radius-pill); font-weight:700; font-size:12px;
+  cursor:pointer; font-family:'Space Grotesk',sans-serif;
+}
+
+/* ========== PROFILE: DEADLINE ========== */
+.deadline-card {
+  margin:16px 40px; padding:16px 20px; background:var(--white);
+  border-radius:14px; box-shadow:var(--shadow-sm);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.deadline-info { display:flex; align-items:center; gap:12px; }
+.deadline-info span { font-size:24px; }
+.deadline-label { font-size:11px; color:#999; font-weight:600; text-transform:uppercase; }
+.deadline-dates { font-size:13px; font-weight:600; margin-top:2px; }
+.deadline-remaining {
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:700;
+  padding:6px 14px; border-radius:20px;
+}
+.deadline-remaining.ok { background:rgba(0,230,118,0.1); color:#00a854; }
+.deadline-remaining.warn { background:rgba(255,230,0,0.15); color:#8a7000; }
+.deadline-remaining.danger { background:rgba(255,45,123,0.1); color:var(--pink); }
+
+/* ========== ADMIN: ALERTS ========== */
+.admin-alerts { padding:0 40px; margin-top:20px; }
+.admin-alert {
+  display:flex; align-items:center; gap:12px; padding:14px 18px;
+  background:rgba(255,45,123,0.08); border:1px solid rgba(255,45,123,0.2);
+  border-radius:12px; margin-bottom:8px; font-size:13px; font-weight:500;
+}
+.admin-alert span { font-size:18px; flex-shrink:0; }
+.admin-alert.warn { background:rgba(255,230,0,0.1); border-color:rgba(255,230,0,0.3); }
+.admin-alert.info { background:rgba(45,91,255,0.06); border-color:rgba(45,91,255,0.15); }
+
+/* ========== ADMIN: CHART ========== */
+.admin-chart {
+  display:flex; align-items:flex-end; gap:12px; height:160px;
+  padding:20px; background:var(--white); border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+}
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.chart-bar {
+  width:100%; border-radius:6px 6px 0 0; min-height:4px;
+  transition:height 0.6s ease;
+}
+.chart-bar-label { font-size:10px; color:#999; font-weight:600; text-align:center; }
+.chart-bar-val { font-size:11px; font-weight:700; text-align:center; }
+
+/* ========== ADMIN: TOOLBAR ========== */
+.admin-section-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+.admin-section-header h3 { margin-bottom:0; }
+.admin-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.admin-filter {
+  padding:8px 14px; border:2px solid rgba(0,0,0,0.08); border-radius:10px;
+  font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600;
+  background:var(--white); color:var(--black); outline:none; cursor:pointer;
+}
+.admin-export-btn {
+  padding:8px 18px; background:var(--blue); color:#fff; border:none;
+  border-radius:10px; font-family:'Space Grotesk',sans-serif;
+  font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.admin-export-btn:hover { transform:translateY(-1px); box-shadow:var(--shadow-sm); }
+
+/* ========== BOTTOM NAV ========== */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0;
+  background:rgba(255,255,255,0.92); backdrop-filter:blur(20px);
+  border-top:2px solid rgba(0,0,0,0.06);
+  display:flex; justify-content:center; gap:10px;
+  padding:12px 20px; z-index:100;
+}
+.nav-btn {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:8px 24px; border-radius:var(--radius);
+  background:transparent; border:none;
+  color:#bbb; font-size:10px; font-family:'Space Grotesk',sans-serif;
+  font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.nav-btn .nav-icon { font-size:22px; }
+.nav-btn.active { color:var(--pink); background:rgba(255,45,123,0.08); }
+.nav-btn:hover { color:var(--pink); }
+
+/* ========== RESULT MODAL ========== */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.4); backdrop-filter:blur(8px);
+  z-index:200; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:var(--white); border-radius:var(--radius-lg); padding:50px 40px;
+  text-align:center; max-width:420px; width:90%;
+  border:2px solid var(--black); animation:modalIn 0.4s ease;
+  box-shadow: var(--shadow-lg);
+}
+@keyframes modalIn {
+  from { transform:scale(0.8) translateY(20px); opacity:0; }
+  to { transform:scale(1) translateY(0); opacity:1; }
+}
+.modal .result-stars { font-size:40px; margin-bottom:15px; }
+.modal h2 {
+  font-family:'Unbounded',sans-serif; font-size:22px; margin-bottom:8px; color:var(--black);
+}
+.modal .result-msg { color:#888; font-size:14px; margin-bottom:8px; font-weight:500; }
+.modal .points-earned {
+  font-family:'Unbounded',sans-serif; font-size:36px; font-weight:800;
+  color:var(--pink); margin:15px 0;
+}
+.modal .points-label { color:#888; font-size:12px; margin-bottom:25px; font-weight:500; }
+.modal .btn-continue {
+  padding:14px 40px; background:var(--pink); color:#fff;
+  border:2px solid var(--black); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif;
+  font-size:14px; font-weight:600; cursor:pointer;
+  transition:all 0.2s; box-shadow: var(--shadow);
+}
+.modal .btn-continue:hover { transform:translate(-2px,-2px); box-shadow:var(--shadow-lg); }
+
+/* Confirm modal */
+.modal .modal-actions {
+  display:flex; gap:12px; justify-content:center; margin-top:20px;
+}
+.modal .btn-confirm {
+  padding:12px 30px; background:var(--green); color:#fff;
+  border:2px solid var(--black); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; box-shadow:var(--shadow-sm);
+  transition:all 0.2s;
+}
+.modal .btn-confirm:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.modal .btn-cancel {
+  padding:12px 30px; background:var(--white);
+  border:2px solid rgba(0,0,0,0.15); border-radius:var(--radius-pill);
+  font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; color:#888; transition:all 0.2s;
+}
+.modal .btn-cancel:hover { border-color:var(--pink); color:var(--pink); }
+
+/* ========== LEADERBOARD ========== */
+.leaderboard-section { padding:0 40px; margin-top:40px; }
+.leaderboard-section h3 {
+  font-family:'Unbounded',sans-serif; font-size:16px; margin-bottom:20px;
+}
+.lb-row {
+  display:flex; align-items:center; gap:15px;
+  padding:14px 18px; background:var(--white);
+  border-radius:var(--radius); margin-bottom:10px;
+  border:2px solid rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+.lb-row:hover { transform:translateY(-2px); }
+.lb-row.you {
+  border-color:var(--pink); background:rgba(255,45,123,0.03);
+  box-shadow: var(--shadow);
+}
+.lb-pos {
+  font-family:'Unbounded',sans-serif; font-size:16px; font-weight:800;
+  width:30px; text-align:center;
+}
+.lb-pos.gold { color:#FFD700; }
+.lb-pos.silver { color:#C0C0C0; }
+.lb-pos.bronze { color:#CD7F32; }
+.lb-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--gray); display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; border:2px solid rgba(0,0,0,0.08);
+  color:var(--black);
+}
+.lb-name { flex:1; font-weight:600; font-size:14px; }
+.lb-name small { display:block; color:#aaa; font-size:11px; font-weight:500; }
+.lb-score {
+  font-family:'Unbounded',sans-serif; font-size:16px; font-weight:700;
+  color:var(--pink);
+}
+
+/* Responsive */
+@media(max-width:768px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); margin:-40px 20px 30px; }
+  .days-grid { grid-template-columns:repeat(2,1fr); }
+  .rewards-grid { grid-template-columns:1fr; }
+  .lesson-content { grid-template-columns:1fr; }
+  .days-section, .progress-section, .leaderboard-section,
+  .lesson-header, .lesson-back, .assignment-section { padding-left:20px; padding-right:20px; }
+  .dash-header { padding:20px 20px 70px; }
+  .wallet-card { margin:0 20px 30px; }
+  .rewards-grid { padding:0 20px; }
+  .profile-stats { padding:0 20px; }
+  .profile-section { padding:0 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN ==================== -->
+<div class="screen active" id="loginScreen">
+  <div class="login-screen">
+    <div class="float-shape s1"></div>
+    <div class="float-shape s2"></div>
+    <div class="float-shape s3"></div>
+    <div class="login-box">
+      <div class="logo">M<span>&</span>M</div>
+      <div class="subtitle">Платформа обучения стажёров</div>
+
+      <div class="role-toggle">
+        <button class="role-btn active" id="roleIntern" onclick="setLoginRole('intern')">
+          <span class="role-icon">&#127891;</span> Стажёр
+        </button>
+        <button class="role-btn" id="roleAdmin" onclick="setLoginRole('admin')">
+          <span class="role-icon">&#128272;</span> Администратор
+        </button>
+      </div>
+
+      <input type="text" id="inputName" placeholder="Имя" />
+      <input type="text" id="inputSurname" placeholder="Фамилия" />
+      <div id="codeFieldWrap">
+        <input type="text" id="inputCode" class="code-input" placeholder="- - - - - -" maxlength="6" />
+      </div>
+
+      <button class="btn-enter" id="btnLogin" onclick="doLogin()">ВОЙТИ В ОБУЧЕНИЕ</button>
+      <div class="login-error" id="loginError"></div>
+      <div class="hint" id="loginHint">Введите код доступа от куратора</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div class="screen" id="dashScreen">
+  <div class="dashboard">
+
+    <!-- Mission & Values -->
+    <div class="mission-banner">
+      <div class="mission-top">
+        <div>
+          <div class="logo">M&M Academy</div>
+          <div class="logo-sub">Фабрика красивых тел</div>
+        </div>
+        <div class="top-avatar" id="topAvatar" onclick="showScreen('profileScreen','profile')">А</div>
+      </div>
+      <div class="mission-content">
+        <div class="mission-label">&#10024; Наша миссия</div>
+        <div class="mission-title">Помогаем каждому <em>обрести уверенность</em> в своём теле</div>
+        <div class="mission-desc">Мы обучаем специалистов, которые дарят людям красоту и здоровье. Каждый стажёр M&M — будущий мастер, способный менять жизни к лучшему.</div>
+      </div>
+      <div class="values-row">
+        <div class="value-tag"><span class="vt-icon">&#128150;</span> Забота о клиенте</div>
+        <div class="value-tag"><span class="vt-icon">&#127891;</span> Экспертность</div>
+        <div class="value-tag"><span class="vt-icon">&#9889;</span> Результат</div>
+        <div class="value-tag"><span class="vt-icon">&#129309;</span> Командный дух</div>
+        <div class="value-tag"><span class="vt-icon">&#128640;</span> Развитие</div>
+      </div>
+    </div>
+
+    <!-- User Hero Card -->
+    <div class="user-card-section">
+      <div class="user-hero-card">
+        <div class="user-hero-left" onclick="showScreen('profileScreen','profile')">
+          <div class="user-hero-avatar" id="userAvatar">А</div>
+          <div class="user-hero-info">
+            <div class="user-hero-name" id="userName">Алия Касымова</div>
+            <div class="user-hero-rank" id="userRankLabel">&#11088; Стажёр</div>
+          </div>
+        </div>
+        <div class="user-hero-stats">
+          <div class="user-hero-stat">
+            <div class="uhs-value" id="statPoints" style="color:var(--pink);">0</div>
+            <div class="uhs-label">Баллов</div>
+          </div>
+          <div class="user-hero-stat">
+            <div class="uhs-value" id="statDays" style="color:#00a854;">0/10</div>
+            <div class="uhs-label">Дней</div>
+          </div>
+          <div class="user-hero-stat">
+            <div class="uhs-value" id="statStreak" style="color:var(--blue);">0</div>
+            <div class="uhs-label">Серия</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(255,230,0,0.15);">&#11088;</div>
+        <div class="stat-value" id="statPointsSmall" style="color:#b8a000;">0</div>
+        <div class="stat-label">Баллов заработано</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(0,230,118,0.12);">&#9989;</div>
+        <div class="stat-value" id="statDaysSmall" style="color:#00a854;">0/10</div>
+        <div class="stat-label">Дней пройдено</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(255,45,123,0.1);">&#128293;</div>
+        <div class="stat-value" id="statStreakSmall" style="color:var(--pink);">0</div>
+        <div class="stat-label">Дней подряд</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,91,255,0.1);">&#127942;</div>
+        <div class="stat-value" style="color:var(--blue);">2-е</div>
+        <div class="stat-label">Место в рейтинге</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-section">
+      <h3>Ваш прогресс</h3>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%;" data-percent="0%"></div>
+      </div>
+      <div class="rank-badges" id="rankBadges">
+        <span class="active-rank">&#127793; Новичок</span>
+        <span>&#11088; Стажёр</span>
+        <span>&#128142; Специалист</span>
+        <span>&#127942; Мастер M&M</span>
+      </div>
+    </div>
+
+    <!-- Days -->
+    <div class="days-section">
+      <h3>Программа обучения — 10 дней</h3>
+      <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-section">
+      <h3>&#127942; Рейтинг стажёров</h3>
+      <div class="lb-list" id="lbList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== LESSON SCREEN ==================== -->
+<div class="screen" id="lessonScreen">
+  <div class="lesson-screen">
+    <a class="lesson-back" onclick="showScreen('dashScreen','dash')">&#8592; Назад к программе</a>
+
+    <div class="lesson-header">
+      <div class="day-label" id="lessonDayLabel">ДЕНЬ 1 ИЗ 10</div>
+      <h1 id="lessonTitle">Заголовок урока</h1>
+      <p id="lessonDesc">Описание урока</p>
+    </div>
+
+    <div class="lesson-content">
+      <div>
+        <div class="video-area" id="videoArea">
+          <div class="video-title" id="videoTitle">Урок 1</div>
+          <div class="video-play" id="videoPlay" onclick="toggleVideo()">&#9654;</div>
+          <div class="video-duration" id="videoDuration">&#128249; 18:45</div>
+          <div class="video-progress"><div class="video-progress-fill" id="videoProgressFill"></div></div>
+        </div>
+      </div>
+
+      <div class="lesson-sidebar">
+        <div class="sidebar-card">
+          <h4>Программа урока</h4>
+          <ul class="checklist" id="lessonChecklist"></ul>
+        </div>
+
+        <div class="sidebar-card">
+          <h4>&#128161; Полезные материалы</h4>
+          <ul class="checklist" id="lessonMaterials"></ul>
+        </div>
+
+        <div class="sidebar-card" style="background:linear-gradient(135deg,rgba(255,230,0,0.08),rgba(255,45,123,0.06));border-color:rgba(255,45,123,0.15);">
+          <h4>&#127942; Возможная награда</h4>
+          <div style="text-align:center;margin-top:10px;">
+            <div style="font-size:36px;">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+            <div style="font-family:'Unbounded',sans-serif;font-size:24px;font-weight:800;color:var(--pink);margin:8px 0;">5 баллов</div>
+            <div style="color:#aaa;font-size:12px;font-weight:500;">Максимальная оценка за урок</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-section" id="quizSection">
+      <div class="assignment-card">
+        <h3>&#128300; Мини-тест</h3>
+        <p style="color:#888;font-size:13px;margin-bottom:16px;">Ответьте на вопросы перед выполнением задания</p>
+        <div id="quizBody"></div>
+        <button class="btn-submit quiz-submit" id="btnQuiz" onclick="submitQuiz()" style="background:var(--blue);">&#10003; Проверить ответы</button>
+        <div class="quiz-result" id="quizResult" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Curator Feedback -->
+    <div class="feedback-section" id="feedbackSection" style="display:none;">
+      <div class="assignment-card" style="border-left:4px solid var(--blue);">
+        <h3>&#128172; Обратная связь от куратора</h3>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+    </div>
+
+    <div class="assignment-section">
+      <div class="assignment-card">
+        <h3>&#128221; Задание дня</h3>
+        <p id="assignmentText">Текст задания</p>
+        <textarea id="assignmentArea" placeholder="Введите ваш ответ здесь..."></textarea>
+        <button class="btn-submit" id="btnSubmit" onclick="submitAssignment()">&#128228; Отправить на проверку</button>
+        <button class="btn-submit retake-btn" id="btnRetake" onclick="retakeAssignment()" style="display:none;">&#128260; Пересдать задание</button>
+      </div>
+    </div>
+
+    <!-- Pending review status -->
+    <div class="pending-banner" id="pendingBanner" style="display:none;">
+      <span>&#9203;</span> Задание отправлено на проверку куратору. Ожидайте оценку.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REWARDS SCREEN ==================== -->
+<div class="screen" id="rewardsScreen">
+  <div class="rewards-screen">
+    <div class="rewards-header">
+      <a class="lesson-back" onclick="showScreen('dashScreen','dash')" style="padding:0 0 15px;color:rgba(255,255,255,0.6);">&#8592; Назад</a>
+      <h1>&#127873; Магазин бонусов</h1>
+      <p>Обменяйте заработанные баллы на процедуры и услуги M&M Fabrica</p>
+    </div>
+
+    <div class="wallet-card">
+      <div class="wallet-label">Ваш баланс</div>
+      <div class="wallet-balance" id="walletBalance">0 &#11088;</div>
+      <div class="wallet-sub" id="walletSub">Заработано за 0 пройденных дней</div>
+    </div>
+
+    <div style="padding:0 40px;margin-bottom:20px;">
+      <h3 style="font-family:'Unbounded',sans-serif;font-size:16px;">Доступные награды</h3>
+    </div>
+
+    <div class="rewards-grid" id="rewardsGrid"></div>
+  </div>
+</div>
+
+<!-- ==================== PROFILE SCREEN ==================== -->
+<div class="screen" id="profileScreen">
+  <div class="profile-screen">
+    <div class="profile-header">
+      <div class="profile-avatar-lg" id="profileAvatar">А</div>
+      <h1 id="profileName">Алия Касымова</h1>
+      <div class="profile-rank-badge" id="profileRank">&#11088; Стажёр</div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="ps-val" id="profilePoints" style="color:var(--pink);">0</div>
+        <div class="ps-label">БАЛЛОВ</div>
+      </div>
+      <div class="profile-stat">
+        <div class="ps-val" id="profileDays" style="color:var(--green);">0</div>
+        <div class="ps-label">ДНЕЙ</div>
+      </div>
+      <div class="profile-stat">
+        <div class="ps-val" id="profileRewards" style="color:var(--blue);">0</div>
+        <div class="ps-label">НАГРАД</div>
+      </div>
+    </div>
+
+    <!-- Certification Status -->
+    <div class="cert-status-card" id="certStatusCard" style="display:none;">
+      <div class="cert-status-icon" id="certStatusIcon">&#128220;</div>
+      <div class="cert-status-info">
+        <div class="cert-status-title" id="certStatusTitle">Статус аттестации</div>
+        <div class="cert-status-desc" id="certStatusDesc">Описание</div>
+      </div>
+      <button class="cert-status-btn" id="certStatusBtn" style="display:none;" onclick="showCertificate()">Открыть</button>
+    </div>
+
+    <!-- Deadline info -->
+    <div class="deadline-card" id="deadlineCard">
+      <div class="deadline-info">
+        <span>&#128197;</span>
+        <div>
+          <div class="deadline-label">Срок обучения</div>
+          <div class="deadline-dates" id="deadlineDates">-</div>
+        </div>
+      </div>
+      <div class="deadline-remaining" id="deadlineRemaining">-</div>
+    </div>
+
+    <div class="profile-section">
+      <h3>&#128100; Информация</h3>
+      <div class="profile-card">
+        <div class="profile-row">
+          <span class="pr-label">Имя</span>
+          <span class="pr-value" id="profileFullName">Алия Касымова</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Статус</span>
+          <span class="pr-value" id="profileStatus" style="color:var(--green);">Активный стажёр</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Дата начала</span>
+          <span class="pr-value" id="profileDate">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Дедлайн</span>
+          <span class="pr-value" id="profileEndDate">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Средняя оценка</span>
+          <span class="pr-value" id="profileAvg">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="pr-label">Допуск к работе</span>
+          <span class="pr-value" id="profileAdmission">&#8212;</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>&#127942; Достижения</h3>
+      <div class="profile-card" id="achievementsCard"></div>
+    </div>
+
+    <button class="btn-logout" onclick="doLogout()">ВЫЙТИ ИЗ АККАУНТА</button>
+  </div>
+</div>
+
+<!-- ==================== ADMIN PANEL ==================== -->
+<div class="screen" id="adminScreen">
+  <div class="admin-screen">
+    <div class="admin-header">
+      <div class="admin-header-top">
+        <div class="logo">M&M Academy</div>
+        <div class="admin-badge">&#128272; АДМИНИСТРАТОР</div>
+      </div>
+      <h1 id="adminWelcome">Панель управления</h1>
+      <p>Мониторинг обучения стажёров в реальном времени</p>
+    </div>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <!-- Notifications -->
+    <div class="admin-alerts" id="adminAlerts"></div>
+
+    <!-- Progress Chart -->
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h3>&#128200; Динамика обучения</h3>
+      </div>
+      <div class="admin-chart" id="adminChart"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h3>&#128101; Стажёры</h3>
+        <div class="admin-toolbar">
+          <select class="admin-filter" id="filterCohort" onchange="renderAdmin()">
+            <option value="all">Все потоки</option>
+          </select>
+          <select class="admin-filter" id="filterStatus" onchange="renderAdmin()">
+            <option value="all">Все статусы</option>
+            <option value="active">Активные</option>
+            <option value="inactive">Неактивные</option>
+            <option value="pending">С непроверенными</option>
+            <option value="certified">Завершили</option>
+          </select>
+          <button class="admin-export-btn" onclick="exportAdmin()">&#128424; Экспорт</button>
+        </div>
+      </div>
+      <table class="intern-table">
+        <thead>
+          <tr>
+            <th>Стажёр</th>
+            <th>Прогресс</th>
+            <th>Баллы</th>
+            <th>Ср. оценка</th>
+            <th>Видео</th>
+            <th>Статус</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="internTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Intern detail (shown when clicking on intern) -->
+    <div class="admin-section" id="internDetailSection" style="display:none;">
+      <h3 id="internDetailTitle">&#128100; Детали стажёра</h3>
+      <div style="background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;">
+        <div class="intern-detail">
+          <div class="intern-detail-header">
+            <div class="intern-detail-avatar" id="idAvatar">А</div>
+            <div class="intern-detail-info">
+              <h2 id="idName">Имя Фамилия</h2>
+              <div class="detail-rank" id="idRank">Ранг</div>
+            </div>
+          </div>
+          <div class="intern-detail-stats" id="idStats"></div>
+
+          <h4 style="font-family:'Unbounded',sans-serif;font-size:14px;margin-bottom:14px;">&#128250; Прогресс по дням</h4>
+          <div class="day-progress-list" id="dayProgressList"></div>
+          <button class="btn-save-grades" onclick="saveGrades()">&#9989; Сохранить оценки</button>
+
+          <h4 style="font-family:'Unbounded',sans-serif;font-size:14px;margin:24px 0 8px;">&#128221; Заметки куратора</h4>
+          <textarea class="admin-note" id="adminNote" placeholder="Добавьте комментарий о стажёре..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-logout" onclick="doLogout()" style="margin-top:30px;">ВЫЙТИ ИЗ АККАУНТА</button>
+  </div>
+</div>
+
+<!-- ==================== WELCOME MODAL ==================== -->
+<div class="modal-overlay" id="welcomeModal">
+  <div class="welcome-modal">
+    <div class="welcome-step active" id="wStep0">
+      <div class="welcome-icon">&#127891;</div>
+      <h2>Добро пожаловать в M&M Academy!</h2>
+      <p>Вас ждёт 14-дневная программа обучения мастера коррекции фигуры</p>
+      <div class="welcome-info">
+        <div class="wi-item"><span>&#128197;</span> <strong>Срок:</strong> 14 дней на прохождение</div>
+        <div class="wi-item"><span>&#128218;</span> <strong>14 уроков</strong> с видео и материалами</div>
+        <div class="wi-item"><span>&#128221;</span> <strong>Квизы + задания</strong> после каждого урока</div>
+        <div class="wi-item"><span>&#127873;</span> <strong>Бонусы</strong> за набранные баллы</div>
+      </div>
+      <button class="welcome-btn" onclick="nextWelcomeStep()">Далее &#8594;</button>
+    </div>
+    <div class="welcome-step" id="wStep1">
+      <div class="welcome-icon">&#128203;</div>
+      <h2>Как проходит обучение</h2>
+      <div class="welcome-steps-list">
+        <div class="ws-item"><span class="ws-num">1</span> Смотрите видеоурок</div>
+        <div class="ws-item"><span class="ws-num">2</span> Проходите мини-тест (квиз)</div>
+        <div class="ws-item"><span class="ws-num">3</span> Выполняете практическое задание</div>
+        <div class="ws-item"><span class="ws-num">4</span> Куратор проверяет и ставит оценку</div>
+        <div class="ws-item"><span class="ws-num">5</span> Получаете баллы и открываете следующий день</div>
+      </div>
+      <button class="welcome-btn" onclick="nextWelcomeStep()">Далее &#8594;</button>
+    </div>
+    <div class="welcome-step" id="wStep2">
+      <div class="welcome-icon">&#127942;</div>
+      <h2>Ваша цель</h2>
+      <p>Наберите минимум <strong>30 баллов</strong> и получите сертификат мастера M&M</p>
+      <div class="welcome-goals">
+        <div class="wg-item"><span>&#11088;</span> Набрать среднюю оценку &#8805; 3.5</div>
+        <div class="wg-item"><span>&#128218;</span> Пройти все 14 дней обучения</div>
+        <div class="wg-item"><span>&#128220;</span> Получить сертификат и допуск к работе</div>
+      </div>
+      <button class="welcome-btn green" onclick="closeWelcome()">&#128640; Начать обучение!</button>
+    </div>
+    <div class="welcome-dots">
+      <span class="wdot active" onclick="goWelcomeStep(0)"></span>
+      <span class="wdot" onclick="goWelcomeStep(1)"></span>
+      <span class="wdot" onclick="goWelcomeStep(2)"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CERTIFICATE MODAL ==================== -->
+<div class="modal-overlay" id="certModal">
+  <div class="cert-container">
+    <div class="cert-card" id="certCard">
+      <div class="cert-border">
+        <div class="cert-header">
+          <div class="cert-logo">M<span>&</span>M Fabrica</div>
+          <div class="cert-subtitle">ACADEMY</div>
+        </div>
+        <div class="cert-body">
+          <div class="cert-label">СЕРТИФИКАТ</div>
+          <div class="cert-type">Мастер коррекции фигуры</div>
+          <div class="cert-name" id="certName">Имя Фамилия</div>
+          <div class="cert-text">успешно завершил(а) программу обучения<br>M&M Fabrica Academy и допущен(а) к работе</div>
+          <div class="cert-stats">
+            <div><strong id="certScore">0</strong><br>баллов</div>
+            <div><strong id="certAvg">0</strong><br>ср. оценка</div>
+            <div><strong id="certDays">10</strong><br>дней</div>
+          </div>
+          <div class="cert-date" id="certDate">06.04.2026</div>
+          <div class="cert-seal">&#128283; M&M Fabrica</div>
+        </div>
+      </div>
+    </div>
+    <div class="cert-actions">
+      <button class="cert-btn" onclick="closeCert()">&#10005; Закрыть</button>
+      <button class="cert-btn primary" onclick="printCert()">&#128424; Скачать PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ==================== TOAST ==================== -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon"></div>
+  <div class="toast-text" id="toastText"></div>
+</div>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+  <button class="nav-btn active" onclick="showScreen('dashScreen','dash')">
+    <span class="nav-icon">&#128218;</span> Обучение
+  </button>
+  <button class="nav-btn" onclick="showScreen('rewardsScreen','rewards')">
+    <span class="nav-icon">&#127873;</span> Бонусы
+  </button>
+  <button class="nav-btn" onclick="showScreen('dashScreen','lb')">
+    <span class="nav-icon">&#127942;</span> Рейтинг
+  </button>
+  <button class="nav-btn" onclick="showScreen('profileScreen','profile')">
+    <span class="nav-icon">&#128100;</span> Профиль
+  </button>
+</div>
+
+<script>
+// ===== DATA =====
+const LESSONS = [
+  { title:'Введение в индустрию коррекции фигуры', desc:'Узнайте историю и современные тренды в сфере эстетической коррекции тела', duration:'12:30',
+    materials:['История бодискульптинга (PDF)','Тренды 2024-2025','Глоссарий терминов'],
+    task:'Напишите эссе (5-7 предложений): почему коррекция фигуры востребована сегодня? Какие основные запросы клиентов вы знаете?',
+    checklist:['Посмотреть видеоурок','Прочитать глоссарий','Выполнить задание','Получить оценку'] },
+  { title:'Аппараты и технологии студии M&M', desc:'Изучите все аппараты студии: LPG, кавитация, RF-лифтинг, криолиполиз', duration:'22:15',
+    materials:['Каталог аппаратов M&M','Техпаспорта оборудования','Сравнительная таблица'],
+    task:'Составьте таблицу: для каждого аппарата укажите название, принцип действия, зоны применения и среднее время процедуры.',
+    checklist:['Посмотреть видеоурок','Изучить каталог','Заполнить таблицу','Получить оценку'] },
+  { title:'Работа с клиентом: первая консультация', desc:'Научитесь проводить первичную консультацию, выявлять потребности и составлять план', duration:'18:00',
+    materials:['Скрипт первой консультации','Анкета клиента (шаблон)','Примеры диалогов'],
+    task:'Напишите сценарий первой консультации с клиенткой, которая хочет убрать "галифе". Включите приветствие, вопросы, рекомендации и план.',
+    checklist:['Посмотреть видеоурок','Изучить скрипт','Написать сценарий','Получить оценку'] },
+  { title:'Протоколы процедур: LPG и вакуум', desc:'Детальный разбор протоколов LPG-массажа и вакуумной терапии', duration:'25:40',
+    materials:['Протокол LPG (пошаговый)','Карта зон воздействия','Противопоказания LPG'],
+    task:'Опишите полный протокол LPG-массажа зоны "живот + бока": подготовка, настройки аппарата, техника, длительность, завершение, рекомендации клиенту.',
+    checklist:['Посмотреть видеоурок','Изучить протокол','Описать процедуру','Получить оценку'] },
+  { title:'Антицеллюлитный массаж: теория и практика', desc:'Изучите основные техники массажа и научитесь определять зоны воздействия', duration:'18:45',
+    materials:['Карта зон массажа (PDF)','Чек-лист процедуры','Противопоказания'],
+    task:'Опишите пошаговый протокол антицеллюлитного массажа для клиентки с проблемной зоной "бёдра + ягодицы". Укажите: время, масла, технику, подходы.',
+    checklist:['Посмотреть видеоурок','Изучить материалы','Выполнить задание','Получить оценку'] },
+  { title:'Криолиполиз и термаж: показания', desc:'Разберитесь в технологиях холодового и теплового воздействия на жировую ткань', duration:'20:10',
+    materials:['Протокол криолиполиза','Сравнение крио vs термаж','Показания и противопоказания'],
+    task:'Клиентка 35 лет хочет убрать жировые отложения на боках. Обоснуйте выбор между криолиполизом и термажом: плюсы, минусы, ожидаемый результат.',
+    checklist:['Посмотреть видеоурок','Сравнить методы','Написать обоснование','Получить оценку'] },
+  { title:'EMS-тренировки и электростимуляция', desc:'Освойте принципы EMS и научитесь составлять программы тренировок', duration:'16:30',
+    materials:['Руководство по EMS-аппарату','Программы тренировок','Типичные ошибки'],
+    task:'Составьте программу EMS-тренировки для новичка: разминка, основная часть, заминка. Укажите группы мышц, интенсивность и время на каждый этап.',
+    checklist:['Посмотреть видеоурок','Изучить программы','Составить план','Получить оценку'] },
+  { title:'Косметология лица: базовые уходы', desc:'Познакомьтесь с основными процедурами для лица: чистка, пилинг, маски', duration:'21:00',
+    materials:['Типы кожи (гайд)','Протоколы чистки','Каталог средств M&M'],
+    task:'Определите тип кожи по описанию (даны 3 кейса) и подберите для каждого подходящую процедуру с обоснованием выбора.',
+    checklist:['Посмотреть видеоурок','Изучить типы кожи','Решить кейсы','Получить оценку'] },
+  { title:'Составление индивидуальных программ', desc:'Научитесь создавать комплексные программы коррекции для разных целей', duration:'24:20',
+    materials:['Шаблон индив. программы','Примеры готовых программ','Калькулятор процедур'],
+    task:'Составьте индивидуальную программу на 1 месяц для клиентки, цель — минус 2 размера. Включите: процедуры, частоту, домашний уход, питание.',
+    checklist:['Посмотреть видеоурок','Изучить шаблоны','Составить программу','Получить оценку'] },
+  { title:'Финальный экзамен и сертификация', desc:'Пройдите итоговый тест и получите сертификат мастера M&M Fabrica', duration:'30:00',
+    materials:['Памятка к экзамену','Все протоколы (сводка)','Критерии оценки'],
+    task:'Итоговый кейс: клиентка 28 лет, цель — подготовка к отпуску за 3 недели. Составьте полный план: консультация, процедуры, график, рекомендации, стоимость.',
+    checklist:['Повторить материалы','Пройти тест','Решить итоговый кейс','Получить сертификат'] }
+];
+
+const REWARDS = [
+  { emoji:'\uD83D\uDC86\u200D\u2640\uFE0F', name:'LPG-массаж', desc:'1 сеанс LPG-массажа любой зоны на выбор (30 минут)', cost:15 },
+  { emoji:'\uD83E\uDDCA', name:'Криолиполиз', desc:'1 зона криолиполиза — заморозка жировых клеток', cost:30 },
+  { emoji:'\u2728', name:'Чистка лица', desc:'Комбинированная чистка лица с уходом', cost:20 },
+  { emoji:'\uD83C\uDFCB\uFE0F\u200D\u2640\uFE0F', name:'EMS-тренировка', desc:'1 сеанс EMS-тренировки на аппарате (25 минут)', cost:10 },
+  { emoji:'\uD83C\uDF81', name:'Комплекс "Детокс"', desc:'Прессотерапия + лимфодренаж + обёртывание', cost:40 },
+  { emoji:'\uD83D\uDC51', name:'VIP день в M&M', desc:'Полный день процедур: массаж + уход + EMS + обёртывание', cost:50 }
+];
+
+const QUIZZES = [
+  [{ q:'Что является главной целью коррекции фигуры?', opts:['Лечение болезней','Эстетическое улучшение тела','Спортивная подготовка','Диетология'], ans:1 },
+   { q:'Какой тренд доминирует в индустрии 2024-2025?', opts:['Хирургическая липосакция','Аппаратные неинвазивные методы','Только ручной массаж','Таблетки для похудения'], ans:1 }],
+  [{ q:'Какой аппарат используется для вакуумно-роликового массажа?', opts:['RF-лифтинг','Криолиполиз','LPG','EMS'], ans:2 },
+   { q:'Что такое кавитация?', opts:['Заморозка жира','УЗ-разрушение жировых клеток','Электростимуляция','Лазерная шлифовка'], ans:1 }],
+  [{ q:'Что нужно выявить на первой консультации?', opts:['Возраст клиента','Потребности и ожидания','Размер одежды','Группу крови'], ans:1 },
+   { q:'Какой документ заполняется при первом визите?', opts:['Договор аренды','Анкета клиента','Рецепт врача','Страховой полис'], ans:1 }],
+  [{ q:'Оптимальная температура насадки LPG:', opts:['10-15°C','20-25°C','35-42°C','50-60°C'], ans:2 },
+   { q:'Какая зона НЕ обрабатывается LPG?', opts:['Живот','Бёдра','Лицо (без спец. насадки)','Щитовидная железа'], ans:3 }],
+  [{ q:'Основной эффект антицеллюлитного массажа:', opts:['Наращивание мышц','Улучшение лимфодренажа','Отбеливание кожи','Удаление татуировок'], ans:1 },
+   { q:'Противопоказание для антицеллюлитного массажа:', opts:['Целлюлит 2 стадии','Варикоз 3 степени','Сухая кожа','Возраст 30+'], ans:1 }],
+  [{ q:'При какой температуре происходит криолиполиз?', opts:['0°C','-5 до -10°C','−20°C','−40°C'], ans:1 },
+   { q:'Термаж воздействует на:', opts:['Мышцы','Кости','Коллагеновые волокна дермы','Волосяные фолликулы'], ans:2 }],
+  [{ q:'EMS расшифровывается как:', opts:['Electric Muscle Stimulation','Energy Mass System','Electro Magnetic Scanner','Extra Motion Sport'], ans:0 },
+   { q:'Максимальная длительность EMS-тренировки:', opts:['10 мин','20-25 мин','60 мин','90 мин'], ans:1 }],
+  [{ q:'Какой тип кожи характеризуется жирным блеском в Т-зоне?', opts:['Сухая','Нормальная','Комбинированная','Чувствительная'], ans:2 },
+   { q:'Что НЕ входит в комбинированную чистку лица?', opts:['Механическая экстракция','Ультразвуковой пилинг','Лазерная шлифовка','Нанесение маски'], ans:2 }],
+  [{ q:'Что учитывается при составлении индивидуальной программы?', opts:['Только вес','Цели, противопоказания, образ жизни','Только возраст','Цвет волос'], ans:1 },
+   { q:'Оптимальная частота процедур коррекции:', opts:['Каждый день','2-3 раза в неделю','Раз в месяц','Раз в год'], ans:1 }],
+  [{ q:'Минимальная средняя оценка для сертификации:', opts:['2.0','3.0','3.5','5.0'], ans:2 },
+   { q:'Что получает стажёр после успешной аттестации?', opts:['Диплом вуза','Сертификат мастера M&M','Водительские права','Медицинскую лицензию'], ans:1 }]
+];
+
+const ACHIEVEMENTS = [
+  { icon:'\uD83C\uDF1F', bg:'rgba(255,230,0,0.15)', name:'Первый шаг', desc:'Завершить день 1', condition: s => s.completed >= 1 },
+  { icon:'\uD83D\uDD25', bg:'rgba(255,45,123,0.1)', name:'В ударе', desc:'3 дня подряд', condition: s => s.streak >= 3 },
+  { icon:'\u2B50', bg:'rgba(255,230,0,0.15)', name:'Отличник', desc:'Получить 5 звёзд за урок', condition: s => s.scores.some(x => x === 5) },
+  { icon:'\uD83D\uDCDA', bg:'rgba(45,91,255,0.1)', name:'Половина пути', desc:'Завершить 5 дней', condition: s => s.completed >= 5 },
+  { icon:'\uD83C\uDFC6', bg:'rgba(0,230,118,0.12)', name:'Мастер M&M', desc:'Завершить все 10 дней', condition: s => s.completed >= 10 },
+  { icon:'\uD83D\uDC8E', bg:'rgba(45,91,255,0.1)', name:'Перфекционист', desc:'Все 10 дней на 5 звёзд', condition: s => s.completed >= 10 && s.scores.every(x => x === 5) },
+  { icon:'\uD83C\uDF81', bg:'rgba(255,45,123,0.1)', name:'Шопоголик', desc:'Обменять первую награду', condition: s => s.rewardsRedeemed >= 1 },
+];
+
+// ===== STATE =====
+let state = {
+  name: '', surname: '', isAdmin: false,
+  scores: Array(10).fill(0), // 0 = not done, 1-5 = score
+  currentDay: 0,
+  completed: 0,
+  streak: 0,
+  points: 0,
+  rewardsRedeemed: 0,
+  redeemedList: [],
+  videoWatched: false,
+  loginDate: '',
+  startDate: '',
+  endDate: '',
+  quizPassed: Array(10).fill(false),
+  pendingReview: Array(10).fill(false), // true = submitted, awaiting grade
+  curatorComments: Array(10).fill(''), // feedback per lesson
+  certified: false
+};
+
+let videoInterval = null;
+let videoProgress = 0;
+
+// ===== SCREENS =====
+function showScreen(id, tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.remove('active');
+  });
+  // Activate correct nav button
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const tabMap = state.isAdmin
+    ? { admin:0, dash:1, rewards:2, lb:3, profile:4 }
+    : { dash:0, rewards:1, lb:2, profile:3 };
+  if (tabMap[tab] !== undefined && navBtns[tabMap[tab]]) navBtns[tabMap[tab]].classList.add('active');
+
+  window.scrollTo(0,0);
+  if (tab === 'lb') {
+    setTimeout(() => document.querySelector('.leaderboard-section').scrollIntoView({behavior:'smooth'}), 100);
+  }
+  if (tab === 'rewards') renderRewards();
+  if (tab === 'profile') renderProfile();
+  if (tab === 'dash') renderDashboard();
+  if (tab === 'admin') renderAdmin();
+  stopVideo();
+}
+
+// ===== TOAST =====
+function showToast(icon, text, sub) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastText').innerHTML = text + (sub ? '<small>'+sub+'</small>' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ===== LOGIN =====
+let loginRole = 'intern'; // 'intern' or 'admin'
+
+function setLoginRole(role) {
+  loginRole = role;
+  const internBtn = document.getElementById('roleIntern');
+  const adminBtn = document.getElementById('roleAdmin');
+  const codeWrap = document.getElementById('codeFieldWrap');
+  const btnLogin = document.getElementById('btnLogin');
+  const hint = document.getElementById('loginHint');
+
+  internBtn.classList.remove('active','admin-active');
+  adminBtn.classList.remove('active','admin-active');
+
+  if (role === 'admin') {
+    adminBtn.classList.add('admin-active');
+    codeWrap.style.display = 'none';
+    btnLogin.textContent = 'ВОЙТИ КАК АДМИН';
+    btnLogin.style.background = 'var(--blue)';
+    hint.textContent = 'Вход в панель управления';
+  } else {
+    internBtn.classList.add('active');
+    codeWrap.style.display = 'block';
+    btnLogin.textContent = 'ВОЙТИ В ОБУЧЕНИЕ';
+    btnLogin.style.background = 'var(--pink)';
+    hint.textContent = 'Введите код доступа от куратора';
+  }
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function doLogin() {
+  const name = document.getElementById('inputName').value.trim();
+  const surname = document.getElementById('inputSurname').value.trim();
+  const code = document.getElementById('inputCode').value.trim();
+  const err = document.getElementById('loginError');
+
+  if (!name || !surname) { err.textContent = 'Введите имя и фамилию'; err.style.display='block'; return; }
+
+  if (loginRole === 'intern') {
+    if (code !== '123456') { err.textContent = 'Неверный код доступа'; err.style.display='block'; return; }
+  }
+
+  state.name = name;
+  state.surname = surname;
+  state.isAdmin = (loginRole === 'admin');
+  const today = new Date();
+  state.loginDate = today.toLocaleDateString('ru-RU');
+  state.startDate = today.toLocaleDateString('ru-RU');
+  const end = new Date(today); end.setDate(end.getDate() + 14);
+  state.endDate = end.toLocaleDateString('ru-RU');
+
+  // Demo: pre-fill some data for demo feel
+  if (state.isAdmin) {
+    state.scores = [5,4,5,5,4,5,3,5,4,5];
+    state.completed = 10;
+    state.currentDay = 10;
+    state.streak = 10;
+    state.points = 45;
+    state.quizPassed = Array(10).fill(true);
+    state.curatorComments = ['Отлично!','Хорошо','Превосходно!','Отлично!','Хорошо','Превосходно!','Нужно доработать','Отлично!','Хорошо','Превосходно — сертификация!'];
+    state.certified = true;
+  } else {
+    state.scores = [5,4,5,5,0,0,0,0,0,0];
+    state.completed = 4;
+    state.currentDay = 4;
+    state.streak = 4;
+    state.points = 19;
+    state.quizPassed = [true,true,true,true,false,false,false,false,false,false];
+    state.curatorComments = ['Отличная работа! Хорошее понимание темы.','Хорошо, но можно добавить больше деталей по аппаратам.','Превосходный сценарий консультации!','Отлично разобрались в протоколе!','','','','','',''];
+    state.pendingReview = Array(10).fill(false);
+    // Demo: set start date in the past
+    const demoStart = new Date(today); demoStart.setDate(demoStart.getDate() - 5);
+    state.startDate = demoStart.toLocaleDateString('ru-RU');
+    const demoEnd = new Date(demoStart); demoEnd.setDate(demoEnd.getDate() + 14);
+    state.endDate = demoEnd.toLocaleDateString('ru-RU');
+  }
+
+  document.getElementById('bottomNav').style.display = 'flex';
+  updateNavForRole();
+  if (state.isAdmin) {
+    showScreen('adminScreen','admin');
+    showToast('\uD83D\uDC4B', 'Добро пожаловать, ' + name + '!', 'Вход как администратор');
+  } else {
+    showScreen('dashScreen','dash');
+    showToast('\uD83D\uDC4B', 'Добро пожаловать, ' + name + '!', 'Удачного обучения!');
+    // Show welcome for interns
+    setTimeout(() => {
+      document.getElementById('welcomeModal').classList.add('show');
+      currentWelcomeStep = 0;
+    }, 800);
+  }
+}
+
+function doLogout() {
+  document.getElementById('bottomNav').style.display = 'none';
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputSurname').value = '';
+  document.getElementById('inputCode').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  setLoginRole('intern');
+  showScreen('loginScreen','');
+  showToast('\uD83D\uDC4B', 'Вы вышли из аккаунта');
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const pts = state.points;
+  const comp = state.completed;
+  const pct = Math.round(comp / 10 * 100);
+
+  // User hero card
+  document.getElementById('userName').textContent = state.name + ' ' + state.surname;
+  document.getElementById('userAvatar').textContent = state.name.charAt(0).toUpperCase();
+  document.getElementById('topAvatar').textContent = state.name.charAt(0).toUpperCase();
+  document.getElementById('statPoints').textContent = pts;
+  document.getElementById('statDays').textContent = comp + '/10';
+  document.getElementById('statStreak').textContent = state.streak;
+  // Small stat cards
+  var sps = document.getElementById('statPointsSmall'); if(sps) sps.textContent = pts;
+  var sds = document.getElementById('statDaysSmall'); if(sds) sds.textContent = comp + '/10';
+  var sss = document.getElementById('statStreakSmall'); if(sss) sss.textContent = state.streak;
+
+  const pf = document.getElementById('progressFill');
+  pf.style.width = pct + '%';
+  pf.dataset.percent = pct + '%';
+
+  // Rank
+  const rank = getRank(pts);
+  document.getElementById('userRankLabel').innerHTML = rank.icon + ' ' + rank.name;
+  const badges = document.getElementById('rankBadges');
+  const ranks = [{n:'Новичок',i:'\uD83C\uDF31',min:0},{n:'Стажёр',i:'\u2B50',min:10},{n:'Специалист',i:'\uD83D\uDC8E',min:25},{n:'Мастер M&M',i:'\uD83C\uDFC6',min:40}];
+  badges.innerHTML = ranks.map(r => '<span class="' + (pts >= r.min ? 'active-rank' : '') + '">' + r.i + ' ' + r.n + '</span>').join('');
+
+  // Days grid
+  const grid = document.getElementById('daysGrid');
+  grid.innerHTML = LESSONS.map((l, i) => {
+    const score = state.scores[i];
+    const isDone = score > 0;
+    const isCurrent = i === state.currentDay;
+    const isLocked = i > state.currentDay;
+    let cls = 'day-card';
+    if (isDone) cls += ' completed';
+    else if (isCurrent) cls += ' current';
+    else if (isLocked) cls += ' locked';
+
+    const stars = Array(5).fill(0).map((_,si) =>
+      '<span class="star '+(si < score ? 'filled' : 'empty')+'">&#9733;</span>'
+    ).join('');
+
+    let statusHtml = '';
+    if (isDone) statusHtml = '<span class="day-status done">&#10003; Пройдено — '+score+' баллов</span>';
+    else if (isCurrent) statusHtml = '<span class="day-status active">&#9654; Текущий урок</span>';
+    else statusHtml = '<span class="day-status lock">&#128274; Заблокировано</span>';
+
+    let badge = isDone ? '&#9989;' : isCurrent ? '&#128214;' : '&#128274;';
+
+    return '<div class="'+cls+'" onclick="openLesson('+i+')">' +
+      '<div class="day-badge">'+badge+'</div>' +
+      '<div class="day-num">ДЕНЬ '+(i+1)+'</div>' +
+      '<div class="day-title">'+l.title+'</div>' +
+      '<div class="day-stars">'+stars+'</div>' +
+      statusHtml + '</div>';
+  }).join('');
+
+  // Leaderboard
+  renderLeaderboard();
+}
+
+function getRank(pts) {
+  if (pts >= 40) return {name:'Мастер M&M', icon:'\uD83C\uDFC6'};
+  if (pts >= 25) return {name:'Специалист', icon:'\uD83D\uDC8E'};
+  if (pts >= 10) return {name:'Стажёр', icon:'\u2B50'};
+  return {name:'Новичок', icon:'\uD83C\uDF31'};
+}
+
+function renderLeaderboard() {
+  const lb = [
+    { name:'Дана Ермекова', day:7, pts:35, rank:'Специалист' },
+    { name:'Мадина Нурланова', day:5, pts:22, rank:'Стажёр' },
+    { name:'Аружан Бекова', day:3, pts:13, rank:'Стажёр' },
+    { name:'Камила Жумабаева', day:2, pts:8, rank:'Новичок' },
+  ];
+  if (!state.isAdmin) {
+    lb.push({ name:state.name+' '+state.surname, day:state.currentDay+1, pts:state.points, rank:getRank(state.points).name, you:true });
+  }
+  lb.sort((a,b) => b.pts - a.pts);
+
+  const posClass = ['gold','silver','bronze','',''];
+  document.getElementById('lbList').innerHTML = lb.map((p, i) => {
+    const av = p.you
+      ? '<div class="lb-avatar" style="background:var(--pink);color:#fff;border-color:var(--pink);">'+state.name.charAt(0)+'</div>'
+      : '<div class="lb-avatar">'+p.name.charAt(0)+'</div>';
+    return '<div class="lb-row'+(p.you?' you':'')+'">' +
+      '<div class="lb-pos '+(posClass[i] || '')+'">'+(i+1)+'</div>' +
+      av +
+      '<div class="lb-name">'+p.name+' <small>День '+Math.min(p.day,10)+' &bull; '+p.rank+(p.you?' &bull; Это вы!':'')+'</small></div>' +
+      '<div class="lb-score">'+p.pts+'</div></div>';
+  }).join('');
+}
+
+// ===== LESSON =====
+let currentLessonIdx = 0;
+
+function openLesson(idx) {
+  if (idx > state.currentDay && !state.isAdmin) {
+    showToast('\uD83D\uDD12', 'День '+(idx+1)+' заблокирован', 'Сначала пройдите день '+(state.currentDay+1));
+    return;
+  }
+  currentLessonIdx = idx;
+  const lesson = LESSONS[idx];
+  const isDone = state.scores[idx] > 0;
+
+  document.getElementById('lessonDayLabel').textContent = 'ДЕНЬ '+(idx+1)+' ИЗ 10';
+  document.getElementById('lessonTitle').textContent = lesson.title;
+  document.getElementById('lessonDesc').textContent = lesson.desc;
+  document.getElementById('videoDuration').innerHTML = '&#128249; ' + lesson.duration;
+  document.getElementById('videoTitle').textContent = 'Урок ' + (idx+1);
+  document.getElementById('videoTitle').style.display = 'none';
+  document.getElementById('assignmentText').textContent = lesson.task;
+
+  // Reset video
+  stopVideo();
+  state.videoWatched = isDone;
+  document.getElementById('videoPlay').classList.remove('playing');
+  document.getElementById('videoPlay').innerHTML = '&#9654;';
+  document.getElementById('videoProgressFill').style.width = isDone ? '100%' : '0%';
+  videoProgress = isDone ? 100 : 0;
+
+  // Checklist
+  const cl = document.getElementById('lessonChecklist');
+  cl.innerHTML = lesson.checklist.map((item, i) => {
+    const done = isDone || (i === 0 && state.videoWatched);
+    return '<li class="'+(done?'checked':'')+'" onclick="toggleCheck(this)">' +
+      '<span class="check '+(done?'done':'')+'">'+( done?'&#10003;':'')+'</span> '+item+'</li>';
+  }).join('');
+
+  // Materials
+  const ml = document.getElementById('lessonMaterials');
+  const icons = ['&#128196;','&#128203;','&#128214;'];
+  ml.innerHTML = lesson.materials.map((m, i) =>
+    '<li onclick="openMaterial(\''+m+'\')">' +
+    '<span class="check material-link">'+icons[i % 3]+'</span> '+m+'</li>'
+  ).join('');
+
+  // Quiz
+  renderQuiz(idx);
+
+  // Feedback from curator
+  renderFeedback(idx);
+
+  // Assignment
+  const ta = document.getElementById('assignmentArea');
+  const btn = document.getElementById('btnSubmit');
+  const retakeBtn = document.getElementById('btnRetake');
+  const pending = document.getElementById('pendingBanner');
+  retakeBtn.style.display = 'none';
+  pending.style.display = 'none';
+
+  if (state.pendingReview[idx]) {
+    ta.value = '[Задание отправлено на проверку куратору]';
+    ta.disabled = true;
+    btn.disabled = true;
+    btn.innerHTML = '&#9203; На проверке';
+    pending.style.display = 'flex';
+  } else if (isDone) {
+    ta.value = '[Ваш ответ был принят. Оценка: ' + state.scores[idx] + '/5]';
+    ta.disabled = true;
+    btn.disabled = true;
+    btn.innerHTML = '&#9989; Задание принято';
+    // Retake if score <= 3
+    if (state.scores[idx] <= 3) {
+      retakeBtn.style.display = 'block';
+    }
+  } else {
+    ta.value = '';
+    ta.disabled = false;
+    btn.disabled = false;
+    btn.innerHTML = '&#128228; Отправить на проверку';
+  }
+
+  document.getElementById('bottomNav').style.display = 'flex';
+  showScreen('lessonScreen','');
+}
+
+function toggleCheck(li) {
+  li.classList.toggle('checked');
+  const ch = li.querySelector('.check');
+  if (li.classList.contains('checked')) {
+    ch.classList.add('done');
+    ch.innerHTML = '&#10003;';
+  } else {
+    ch.classList.remove('done');
+    ch.innerHTML = '';
+  }
+}
+
+function openMaterial(name) {
+  showToast('&#128196;', 'Открыт: ' + name, 'Материал загружен для просмотра');
+}
+
+// ===== VIDEO =====
+function toggleVideo() {
+  const btn = document.getElementById('videoPlay');
+  const title = document.getElementById('videoTitle');
+  if (videoInterval) {
+    stopVideo();
+    btn.classList.remove('playing');
+    btn.innerHTML = '&#9654;';
+    title.style.display = 'none';
+  } else {
+    btn.classList.add('playing');
+    btn.innerHTML = '&#9208;';
+    title.style.display = 'block';
+    videoInterval = setInterval(() => {
+      videoProgress += 2;
+      document.getElementById('videoProgressFill').style.width = Math.min(videoProgress, 100) + '%';
+      if (videoProgress >= 100) {
+        stopVideo();
+        state.videoWatched = true;
+        btn.classList.remove('playing');
+        btn.innerHTML = '&#9654;';
+        showToast('&#127909;', 'Видеоурок просмотрен!', 'Теперь выполните задание');
+        // Auto-check first checklist item
+        const firstLi = document.querySelector('#lessonChecklist li');
+        if (firstLi && !firstLi.classList.contains('checked')) toggleCheck(firstLi);
+      }
+    }, 300);
+  }
+}
+
+function stopVideo() {
+  if (videoInterval) { clearInterval(videoInterval); videoInterval = null; }
+}
+
+// ===== ASSIGNMENT =====
+function submitAssignment() {
+  const ta = document.getElementById('assignmentArea');
+  if (!ta.value.trim()) {
+    showToast('&#9888;&#65039;', 'Напишите ответ', 'Поле задания не может быть пустым');
+    return;
+  }
+  if (state.scores[currentLessonIdx] > 0 || state.pendingReview[currentLessonIdx]) return;
+
+  // Check quiz first
+  if (!state.quizPassed[currentLessonIdx]) {
+    showToast('&#128300;', 'Сначала пройдите тест', 'Ответьте на вопросы квиза выше');
+    document.getElementById('quizSection').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  // For demo: simulate instant grading with brief "pending" flash
+  state.pendingReview[currentLessonIdx] = true;
+  document.getElementById('pendingBanner').style.display = 'flex';
+  ta.disabled = true;
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('btnSubmit').innerHTML = '&#9203; Отправлено...';
+  showToast('&#128228;', 'Задание отправлено!', 'Куратор проверяет вашу работу...');
+
+  // Simulate curator review (demo: 2 seconds delay)
+  setTimeout(() => {
+    state.pendingReview[currentLessonIdx] = false;
+
+    // Simulate grading (3-5 stars, weighted toward 4-5)
+    const r = Math.random();
+    const score = r < 0.15 ? 3 : r < 0.45 ? 4 : 5;
+
+    state.scores[currentLessonIdx] = score;
+    state.points += score;
+    state.completed = state.scores.filter(s => s > 0).length;
+    state.currentDay = Math.max(state.currentDay, currentLessonIdx + 1);
+
+    // Generate curator comment
+    const comments3 = ['Есть над чем работать. Обратите внимание на детали.','Неплохо, но нужно больше конкретики.','Слабовато, рекомендую пересдачу.'];
+    const comments4 = ['Хорошая работа! Отличное понимание темы.','Задание выполнено качественно.','Хороший ответ, продолжайте в том же духе!'];
+    const comments5 = ['Превосходно! Идеальный ответ!','Отличная работа, вы настоящий профессионал!','Браво! Лучший ответ в потоке!'];
+    const cArr = score === 3 ? comments3 : score === 4 ? comments4 : comments5;
+    state.curatorComments[currentLessonIdx] = cArr[Math.floor(Math.random() * cArr.length)];
+
+    // Streak
+    let streak = 0;
+    for (let i = 0; i < 10; i++) {
+      if (state.scores[i] > 0) streak++;
+      else break;
+    }
+    state.streak = streak;
+
+    document.getElementById('pendingBanner').style.display = 'none';
+
+    // Show result modal
+    const stars = '&#11088;'.repeat(score) + '<span style="opacity:0.2;">' + '&#11088;'.repeat(5 - score) + '</span>';
+    const titles = {3:'Хорошо!', 4:'Отлично!', 5:'Превосходно!'};
+    const msgs = {3:'Есть над чем работать, но вы справились', 4:'Задание выполнено на высоком уровне', 5:'Идеальный ответ! Вы настоящий профессионал'};
+
+    let retakeHtml = score <= 3
+      ? '<div style="color:#888;font-size:12px;margin-top:8px;">Оценка ≤ 3 — вы можете пересдать это задание</div>'
+      : '';
+
+    let certHtml = '';
+    if (state.completed >= 10) {
+      const cert = checkCertification();
+      if (cert.certified) {
+        certHtml = '<div style="margin-top:16px;padding:12px;background:rgba(0,230,118,0.1);border-radius:12px;font-weight:700;color:#00a854;">&#127942; Поздравляем! Вы прошли аттестацию! <br><button onclick="closeResultModal();showCertificate();" style="margin-top:8px;padding:8px 20px;background:var(--green);color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:700;">Открыть сертификат</button></div>';
+      }
+    }
+
+    document.getElementById('modalContent').innerHTML =
+      '<div class="result-stars">'+stars+'</div>' +
+      '<h2>'+titles[score]+'</h2>' +
+      '<div class="result-msg">'+msgs[score]+'</div>' +
+      '<div style="margin:12px 0;padding:10px 16px;background:var(--cream);border-radius:10px;font-size:13px;color:#555;font-style:italic;">&#128172; Куратор: &#171;' + state.curatorComments[currentLessonIdx] + '&#187;</div>' +
+      '<div class="points-earned">+'+score+'</div>' +
+      '<div class="points-label">баллов начислено на ваш счёт</div>' +
+      retakeHtml + certHtml +
+      '<button class="btn-continue" onclick="closeResultModal()">Продолжить обучение</button>';
+
+    document.getElementById('resultModal').classList.add('show');
+
+    // Check achievements
+    setTimeout(() => checkAchievements(), 1000);
+  }, 2000); // end of setTimeout (simulated review delay)
+}
+
+function closeResultModal() {
+  document.getElementById('resultModal').classList.remove('show');
+  showScreen('dashScreen','dash');
+}
+
+// ===== ACHIEVEMENTS =====
+let shownAchievements = new Set();
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(a => {
+    if (!shownAchievements.has(a.name) && a.condition(state)) {
+      shownAchievements.add(a.name);
+      setTimeout(() => showToast(a.icon, 'Достижение: ' + a.name, a.desc), 500);
+    }
+  });
+}
+
+// ===== REWARDS =====
+function renderRewards() {
+  document.getElementById('walletBalance').innerHTML = state.points + ' &#11088;';
+  document.getElementById('walletSub').textContent = 'Заработано за ' + state.completed + ' пройденных дней';
+
+  const grid = document.getElementById('rewardsGrid');
+  grid.innerHTML = REWARDS.map((r, i) => {
+    const redeemed = state.redeemedList.includes(i);
+    const canAfford = state.points >= r.cost && !redeemed;
+    const diff = r.cost - state.points;
+
+    let btnHtml;
+    if (redeemed) btnHtml = '<button class="reward-btn redeemed-btn">&#9989; Получено</button>';
+    else if (canAfford) btnHtml = '<button class="reward-btn affordable" onclick="redeemReward('+i+')">Получить</button>';
+    else btnHtml = '<button class="reward-btn" onclick="showToast(\'&#128170;\',\'Ещё '+diff+' баллов\',\'Продолжайте обучение!\')">Ещё '+diff+' баллов</button>';
+
+    return '<div class="reward-card'+(redeemed?' redeemed':'')+'">' +
+      '<div class="reward-emoji">'+r.emoji+'</div>' +
+      '<div class="reward-name">'+r.name+'</div>' +
+      '<div class="reward-desc">'+r.desc+'</div>' +
+      '<div class="reward-price">&#11088; '+r.cost+' баллов</div>' +
+      btnHtml + '</div>';
+  }).join('');
+}
+
+function redeemReward(idx) {
+  const r = REWARDS[idx];
+  document.getElementById('modalContent').innerHTML =
+    '<div style="font-size:60px;margin-bottom:15px;">'+r.emoji+'</div>' +
+    '<h2>Обменять баллы?</h2>' +
+    '<div class="result-msg">'+r.name+' за '+r.cost+' баллов</div>' +
+    '<div class="points-earned" style="font-size:24px;">Баланс после: '+(state.points - r.cost)+' &#11088;</div>' +
+    '<div class="modal-actions">' +
+    '<button class="btn-confirm" onclick="confirmRedeem('+idx+')">&#9989; Подтвердить</button>' +
+    '<button class="btn-cancel" onclick="cancelRedeem()">Отмена</button></div>';
+  document.getElementById('resultModal').classList.add('show');
+}
+
+function confirmRedeem(idx) {
+  const r = REWARDS[idx];
+  state.points -= r.cost;
+  state.redeemedList.push(idx);
+  state.rewardsRedeemed++;
+  document.getElementById('resultModal').classList.remove('show');
+  renderRewards();
+  showToast('\uD83C\uDF89', r.name + ' получен!', 'Обратитесь к администратору для активации');
+  checkAchievements();
+}
+
+function cancelRedeem() {
+  document.getElementById('resultModal').classList.remove('show');
+}
+
+// ===== WELCOME =====
+let currentWelcomeStep = 0;
+function nextWelcomeStep() {
+  document.getElementById('wStep' + currentWelcomeStep).classList.remove('active');
+  document.querySelectorAll('.wdot')[currentWelcomeStep].classList.remove('active');
+  currentWelcomeStep++;
+  if (currentWelcomeStep > 2) { closeWelcome(); return; }
+  document.getElementById('wStep' + currentWelcomeStep).classList.add('active');
+  document.querySelectorAll('.wdot')[currentWelcomeStep].classList.add('active');
+}
+function goWelcomeStep(n) {
+  document.getElementById('wStep' + currentWelcomeStep).classList.remove('active');
+  document.querySelectorAll('.wdot')[currentWelcomeStep].classList.remove('active');
+  currentWelcomeStep = n;
+  document.getElementById('wStep' + currentWelcomeStep).classList.add('active');
+  document.querySelectorAll('.wdot')[currentWelcomeStep].classList.add('active');
+}
+function closeWelcome() {
+  document.getElementById('welcomeModal').classList.remove('show');
+}
+
+// ===== QUIZ =====
+let quizAnswers = {};
+function renderQuiz(lessonIdx) {
+  const quiz = QUIZZES[lessonIdx];
+  const section = document.getElementById('quizSection');
+  const body = document.getElementById('quizBody');
+  const result = document.getElementById('quizResult');
+  const btn = document.getElementById('btnQuiz');
+  result.style.display = 'none';
+  quizAnswers = {};
+
+  if (state.quizPassed[lessonIdx]) {
+    body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--green);font-weight:700;font-size:15px;">&#10003; Тест пройден</div>';
+    btn.style.display = 'none';
+    section.style.display = 'block';
+    return;
+  }
+
+  btn.style.display = 'block';
+  body.innerHTML = quiz.map((q, qi) =>
+    '<div class="quiz-question"><h4>' + (qi+1) + '. ' + q.q + '</h4><div class="quiz-opts">' +
+    q.opts.map((o, oi) =>
+      '<label class="quiz-opt" onclick="selectQuizOpt(' + qi + ',' + oi + ',this)">' +
+      '<div class="quiz-radio"></div>' + o + '</label>'
+    ).join('') + '</div></div>'
+  ).join('');
+  section.style.display = 'block';
+}
+
+function selectQuizOpt(qi, oi, el) {
+  const parent = el.closest('.quiz-question');
+  parent.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  quizAnswers[qi] = oi;
+}
+
+function submitQuiz() {
+  const quiz = QUIZZES[currentLessonIdx];
+  if (Object.keys(quizAnswers).length < quiz.length) {
+    showToast('&#9888;', 'Ответьте на все вопросы');
+    return;
+  }
+  let correct = 0;
+  quiz.forEach((q, qi) => {
+    const opts = document.querySelectorAll('.quiz-question')[qi].querySelectorAll('.quiz-opt');
+    opts.forEach((o, oi) => {
+      o.style.pointerEvents = 'none';
+      if (oi === q.ans) o.classList.add('correct');
+      else if (oi === quizAnswers[qi] && oi !== q.ans) o.classList.add('wrong');
+    });
+    if (quizAnswers[qi] === q.ans) correct++;
+  });
+  const passed = correct >= Math.ceil(quiz.length * 0.5);
+  const result = document.getElementById('quizResult');
+  result.style.display = 'block';
+  result.className = 'quiz-result ' + (passed ? 'pass' : 'fail');
+  result.innerHTML = passed
+    ? '&#10003; Тест пройден! ' + correct + '/' + quiz.length + ' правильно'
+    : '&#10007; Тест не пройден. ' + correct + '/' + quiz.length + ' правильно. Попробуйте ещё раз.';
+  document.getElementById('btnQuiz').style.display = 'none';
+  if (passed) {
+    state.quizPassed[currentLessonIdx] = true;
+    showToast('&#128300;', 'Тест пройден!', correct + '/' + quiz.length + ' правильно');
+  } else {
+    setTimeout(() => renderQuiz(currentLessonIdx), 3000);
+  }
+}
+
+// ===== FEEDBACK (visible to intern) =====
+function renderFeedback(lessonIdx) {
+  const section = document.getElementById('feedbackSection');
+  const score = state.scores[lessonIdx];
+  const comment = state.curatorComments[lessonIdx];
+  if (score > 0 && comment) {
+    const stars = '&#11088;'.repeat(score) + '<span style="opacity:0.2;">' + '&#11088;'.repeat(5 - score) + '</span>';
+    document.getElementById('feedbackContent').innerHTML =
+      '<div class="feedback-score">' + stars + ' ' + score + '/5</div>' +
+      '<div class="feedback-comment">&#171; ' + comment + ' &#187;</div>';
+    section.style.display = 'block';
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+// ===== RETAKE =====
+function retakeAssignment() {
+  const idx = currentLessonIdx;
+  state.points -= state.scores[idx];
+  state.scores[idx] = 0;
+  state.pendingReview[idx] = false;
+  state.quizPassed[idx] = false;
+  state.curatorComments[idx] = '';
+  state.completed = state.scores.filter(s => s > 0).length;
+  openLesson(idx);
+  showToast('&#128260;', 'Пересдача открыта', 'Пройдите тест и задание заново');
+}
+
+// ===== CERTIFICATE =====
+function checkCertification() {
+  const doneScores = state.scores.filter(s => s > 0);
+  const avg = doneScores.length ? doneScores.reduce((a,b)=>a+b,0) / doneScores.length : 0;
+  state.certified = state.completed >= 10 && avg >= 3.5;
+  return { certified: state.certified, avg: avg.toFixed(1), total: state.points };
+}
+
+function showCertificate() {
+  const cert = checkCertification();
+  if (!cert.certified) {
+    showToast('&#9888;', 'Сертификат недоступен', 'Пройдите все 10 дней со средней оценкой ≥ 3.5');
+    return;
+  }
+  document.getElementById('certName').textContent = state.name + ' ' + state.surname;
+  document.getElementById('certScore').textContent = cert.total;
+  document.getElementById('certAvg').textContent = cert.avg;
+  document.getElementById('certDays').textContent = state.completed;
+  document.getElementById('certDate').textContent = new Date().toLocaleDateString('ru-RU');
+  document.getElementById('certModal').classList.add('show');
+}
+
+function closeCert() { document.getElementById('certModal').classList.remove('show'); }
+
+function printCert() {
+  const card = document.getElementById('certCard');
+  const w = window.open('','','width=800,height=600');
+  w.document.write('<html><head><title>Сертификат M&M</title>');
+  w.document.write('<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">');
+  w.document.write('<style>body{font-family:"Space Grotesk",sans-serif;display:flex;justify-content:center;padding:40px;} .cert-card{max-width:680px;}</style>');
+  w.document.write('</head><body>');
+  w.document.write(card.outerHTML);
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(() => { w.print(); }, 500);
+}
+
+// ===== NAV ROLE =====
+function updateNavForRole() {
+  const nav = document.getElementById('bottomNav');
+  if (state.isAdmin) {
+    nav.innerHTML = '<button class="nav-btn active" onclick="showScreen(\'adminScreen\',\'admin\')">' +
+      '<span class="nav-icon">&#128272;</span> Админ</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'dashScreen\',\'dash\')">' +
+      '<span class="nav-icon">&#128218;</span> Обучение</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'rewardsScreen\',\'rewards\')">' +
+      '<span class="nav-icon">&#127873;</span> Бонусы</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'dashScreen\',\'lb\')">' +
+      '<span class="nav-icon">&#127942;</span> Рейтинг</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'profileScreen\',\'profile\')">' +
+      '<span class="nav-icon">&#128100;</span> Профиль</button>';
+  } else {
+    nav.innerHTML = '<button class="nav-btn active" onclick="showScreen(\'dashScreen\',\'dash\')">' +
+      '<span class="nav-icon">&#128218;</span> Обучение</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'rewardsScreen\',\'rewards\')">' +
+      '<span class="nav-icon">&#127873;</span> Бонусы</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'dashScreen\',\'lb\')">' +
+      '<span class="nav-icon">&#127942;</span> Рейтинг</button>' +
+      '<button class="nav-btn" onclick="showScreen(\'profileScreen\',\'profile\')">' +
+      '<span class="nav-icon">&#128100;</span> Профиль</button>';
+  }
+}
+
+// ===== ADMIN PANEL =====
+const INTERNS = [
+  { name:'Айгерим', surname:'Касымова', scores:[5,4,5,4,3,0,0,0,0,0], completed:5, currentDay:5, streak:5, points:21,
+    videoMin:[12,22,18,25,15,0,0,0,0,0], notes:'Отличная стажёрка, быстро учится',
+    cohort:'Поток 1 — Март', startDate:'24.03.2025', lastActive:'05.04.2026',
+    pendingDays:[5], curatorComments:['Отлично!','Хорошо, но нужно больше деталей','Превосходная работа','Хороший ответ','Нужно доработать — мало конкретики','','','','',''] },
+  { name:'Дана', surname:'Серикова', scores:[5,5,4,0,0,0,0,0,0,0], completed:3, currentDay:3, streak:3, points:14,
+    videoMin:[12,20,16,0,0,0,0,0,0,0], notes:'Нужно подтянуть практику',
+    cohort:'Поток 1 — Март', startDate:'24.03.2025', lastActive:'04.04.2026',
+    pendingDays:[3], curatorComments:['Превосходно!','Очень хорошо','Нужно больше примеров из практики','','','','','','',''] },
+  { name:'Арман', surname:'Жексенбаев', scores:[4,3,4,5,4,5,3,0,0,0], completed:7, currentDay:7, streak:7, points:28,
+    videoMin:[10,22,18,25,18,20,14,0,0,0], notes:'',
+    cohort:'Поток 1 — Март', startDate:'24.03.2025', lastActive:'06.04.2026',
+    pendingDays:[], curatorComments:['Хорошо','Нужно повторить материал','Хороший ответ','Превосходно!','Хорошо','Отлично!','Слабовато, пересдача рекомендуется','','',''] },
+  { name:'Малика', surname:'Ибрагимова', scores:[5,5,5,5,5,5,5,5,5,5], completed:10, currentDay:10, streak:10, points:50,
+    videoMin:[12,22,18,25,18,20,16,21,24,30], notes:'Лучшая стажёрка потока!',
+    cohort:'Поток 1 — Март', startDate:'24.03.2025', lastActive:'06.04.2026',
+    pendingDays:[], curatorComments:['Превосходно!','Идеально!','Отличная работа!','Превосходно!','Идеально!','Отличная работа!','Превосходно!','Идеально!','Отличная работа!','Превосходно — готова к сертификации!'] },
+  { name:'Нурсултан', surname:'Аманов', scores:[3,4,0,0,0,0,0,0,0,0], completed:2, currentDay:2, streak:0, points:7,
+    videoMin:[8,15,0,0,0,0,0,0,0,0], notes:'Часто пропускает, нужна мотивация',
+    cohort:'Поток 2 — Апрель', startDate:'01.04.2025', lastActive:'02.04.2026',
+    pendingDays:[2], curatorComments:['Слабовато, нужно повторить','Хорошо, прогресс есть','','','','','','','',''] }
+];
+
+const LESSON_DURATIONS_MIN = [12,22,18,25,18,20,16,21,24,30];
+
+let currentInternIdx = -1;
+
+function renderAdmin() {
+  document.getElementById('adminWelcome').textContent = 'Панель управления — ' + state.name;
+
+  // Filters
+  const filterCohort = document.getElementById('filterCohort').value;
+  const filterStatus = document.getElementById('filterStatus').value;
+
+  // Populate cohort filter options
+  const cohorts = [...new Set(INTERNS.map(i => i.cohort))];
+  const cohortSelect = document.getElementById('filterCohort');
+  const currentCohortVal = cohortSelect.value;
+  if (cohortSelect.options.length <= 1) {
+    cohorts.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cohortSelect.appendChild(o); });
+    cohortSelect.value = currentCohortVal;
+  }
+
+  // Filter interns
+  let filtered = INTERNS.map((intern, idx) => ({...intern, _idx: idx}));
+  if (filterCohort !== 'all') filtered = filtered.filter(i => i.cohort === filterCohort);
+  if (filterStatus === 'active') filtered = filtered.filter(i => i.streak > 0);
+  if (filterStatus === 'inactive') filtered = filtered.filter(i => i.streak <= 0);
+  if (filterStatus === 'pending') filtered = filtered.filter(i => i.pendingDays && i.pendingDays.length > 0);
+  if (filterStatus === 'certified') filtered = filtered.filter(i => i.completed >= 10);
+
+  // Stats (from all interns, not filtered)
+  const totalInterns = INTERNS.length;
+  const avgProgress = Math.round(INTERNS.reduce((s,i) => s + i.completed, 0) / totalInterns / 10 * 100);
+  const activeCount = INTERNS.filter(i => i.streak > 0).length;
+  const pendingCount = INTERNS.filter(i => i.pendingDays && i.pendingDays.length > 0).length;
+
+  document.getElementById('adminStats').innerHTML =
+    '<div class="admin-stat-card"><div class="asc-num">' + totalInterns + '</div><div class="asc-label">Стажёров</div></div>' +
+    '<div class="admin-stat-card"><div class="asc-num">' + avgProgress + '%</div><div class="asc-label">Ср. прогресс</div></div>' +
+    '<div class="admin-stat-card"><div class="asc-num">' + activeCount + '</div><div class="asc-label">Активных</div></div>' +
+    '<div class="admin-stat-card"><div class="asc-num" style="' + (pendingCount > 0 ? '-webkit-text-fill-color:var(--pink);' : '') + '">' + pendingCount + '</div><div class="asc-label">На проверке</div></div>';
+
+  // Notifications/alerts
+  const alerts = [];
+  INTERNS.forEach(i => {
+    if (i.streak <= 0 && i.completed < 10) alerts.push({ type:'', text:'&#9888; ' + i.name + ' ' + i.surname + ' — неактивен (последняя активность: ' + (i.lastActive || '—') + ')' });
+    if (i.pendingDays && i.pendingDays.length > 0) alerts.push({ type:'warn', text:'&#9203; ' + i.name + ' ' + i.surname + ' — ' + i.pendingDays.length + ' задание(я) ожидают проверки' });
+  });
+  const certifiedInterns = INTERNS.filter(i => i.completed >= 10 && (i.scores.reduce((a,b)=>a+b,0)/10) >= 3.5);
+  if (certifiedInterns.length > 0) alerts.push({ type:'info', text:'&#127942; ' + certifiedInterns.map(i => i.name).join(', ') + ' — готовы к сертификации' });
+
+  document.getElementById('adminAlerts').innerHTML = alerts.map(a =>
+    '<div class="admin-alert ' + a.type + '"><span></span>' + a.text + '</div>'
+  ).join('');
+
+  // Chart: interns by progress
+  const chartColors = ['var(--pink)','var(--blue)','var(--green)','var(--yellow)','#9c27b0'];
+  document.getElementById('adminChart').innerHTML = INTERNS.map((intern, i) => {
+    const pct = Math.round(intern.completed / 10 * 100);
+    return '<div class="chart-bar-wrap">' +
+      '<div class="chart-bar-val">' + pct + '%</div>' +
+      '<div class="chart-bar" style="height:' + Math.max(pct, 5) + '%;background:' + chartColors[i % chartColors.length] + ';"></div>' +
+      '<div class="chart-bar-label">' + intern.name + '</div></div>';
+  }).join('');
+
+  // Table with filtered interns
+  const tbody = document.getElementById('internTableBody');
+  tbody.innerHTML = filtered.map((intern) => {
+    const idx = intern._idx;
+    const pct = Math.round(intern.completed / 10 * 100);
+    const doneScores = intern.scores.filter(s => s > 0);
+    const avg = doneScores.length ? (doneScores.reduce((a,b)=>a+b,0) / doneScores.length).toFixed(1) : '-';
+    const totalVideoMin = intern.videoMin.reduce((a,b)=>a+b,0);
+    const totalLessonMin = LESSON_DURATIONS_MIN.slice(0, intern.completed).reduce((a,b)=>a+b,0);
+    const videoPct = totalLessonMin > 0 ? Math.round(totalVideoMin / totalLessonMin * 100) : 0;
+    const hasPending = intern.pendingDays && intern.pendingDays.length > 0;
+    let statusClass, statusText;
+    if (intern.completed >= 10) { statusClass = 'active'; statusText = 'Завершил'; }
+    else if (hasPending) { statusClass = ''; statusText = '&#9203; На проверке'; }
+    else if (intern.streak > 0) { statusClass = 'active'; statusText = 'Активен'; }
+    else { statusClass = 'inactive'; statusText = 'Неактивен'; }
+
+    return '<tr class="intern-row" onclick="showInternDetail(' + idx + ')">' +
+      '<td><div style="display:flex;align-items:center;gap:10px;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">' + intern.name.charAt(0) + '</div>' +
+        '<div><div style="font-weight:600;">' + intern.name + ' ' + intern.surname + '</div>' +
+        '<div style="font-size:12px;color:#999;">' + (intern.cohort || '') + '</div></div></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:8px;"><div style="width:60px;height:6px;background:#eee;border-radius:3px;overflow:hidden;">' +
+        '<div style="width:' + pct + '%;height:100%;background:var(--green);border-radius:3px;"></div></div> ' + pct + '%</div></td>' +
+      '<td><strong>' + intern.points + '</strong></td>' +
+      '<td>' + avg + '</td>' +
+      '<td>' + videoPct + '%</td>' +
+      '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td><span style="color:var(--blue);cursor:pointer;font-size:13px;">Подробнее &rarr;</span></td></tr>';
+  }).join('');
+
+  document.getElementById('internDetailSection').style.display = 'none';
+  currentInternIdx = -1;
+}
+
+function exportAdmin() {
+  let csv = 'Стажёр,Поток,Прогресс,Баллы,Ср.оценка,Видео%,Статус\\n';
+  INTERNS.forEach(i => {
+    const pct = Math.round(i.completed / 10 * 100);
+    const doneScores = i.scores.filter(s => s > 0);
+    const avg = doneScores.length ? (doneScores.reduce((a,b)=>a+b,0) / doneScores.length).toFixed(1) : '-';
+    const totalVideoMin = i.videoMin.reduce((a,b)=>a+b,0);
+    const totalLessonMin = LESSON_DURATIONS_MIN.slice(0, i.completed).reduce((a,b)=>a+b,0);
+    const videoPct = totalLessonMin > 0 ? Math.round(totalVideoMin / totalLessonMin * 100) : 0;
+    const status = i.completed >= 10 ? 'Завершил' : i.streak > 0 ? 'Активен' : 'Неактивен';
+    csv += i.name + ' ' + i.surname + ',' + (i.cohort||'') + ',' + pct + '%,' + i.points + ',' + avg + ',' + videoPct + '%,' + status + '\\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'interns_report.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('&#128424;', 'Отчёт экспортирован', 'interns_report.csv');
+}
+
+function showInternDetail(idx) {
+  currentInternIdx = idx;
+  const intern = INTERNS[idx];
+  const rank = getRank(intern.points);
+
+  document.getElementById('internDetailSection').style.display = 'block';
+  document.getElementById('internDetailTitle').innerHTML = '&#128100; ' + intern.name + ' ' + intern.surname;
+  document.getElementById('idAvatar').textContent = intern.name.charAt(0);
+  document.getElementById('idName').textContent = intern.name + ' ' + intern.surname;
+  document.getElementById('idRank').innerHTML = rank.icon + ' ' + rank.name;
+
+  const doneScores = intern.scores.filter(s => s > 0);
+  const avg = doneScores.length ? (doneScores.reduce((a,b)=>a+b,0) / doneScores.length).toFixed(1) : '-';
+  const totalVideoMin = intern.videoMin.reduce((a,b)=>a+b,0);
+
+  document.getElementById('idStats').innerHTML =
+    '<div class="id-stat"><div class="id-stat-num">' + intern.points + '</div><div class="id-stat-label">Баллов</div></div>' +
+    '<div class="id-stat"><div class="id-stat-num">' + intern.completed + '/10</div><div class="id-stat-label">Дней</div></div>' +
+    '<div class="id-stat"><div class="id-stat-num">' + avg + '</div><div class="id-stat-label">Ср. оценка</div></div>' +
+    '<div class="id-stat"><div class="id-stat-num">' + totalVideoMin + ' мин</div><div class="id-stat-label">Видео</div></div>';
+
+  const dpList = document.getElementById('dayProgressList');
+  dpList.innerHTML = LESSONS.map((lesson, i) => {
+    const done = intern.scores[i] > 0;
+    const vidTotal = LESSON_DURATIONS_MIN[i];
+    const vidWatched = intern.videoMin[i];
+    const vidPct = vidTotal > 0 ? Math.round(vidWatched / vidTotal * 100) : 0;
+
+    return '<div class="day-progress-item' + (done ? ' done' : '') + '">' +
+      '<div class="dpi-header">' +
+        '<div class="dpi-day">День ' + (i+1) + '</div>' +
+        '<div class="dpi-title">' + lesson.title + '</div>' +
+      '</div>' +
+      '<div class="dpi-details">' +
+        '<div class="dpi-video">' +
+          '<span>&#128250; Видео: ' + vidWatched + ' / ' + vidTotal + ' мин (' + vidPct + '%)</span>' +
+          '<div style="width:100px;height:5px;background:#eee;border-radius:3px;overflow:hidden;">' +
+            '<div style="width:' + vidPct + '%;height:100%;background:' + (vidPct >= 80 ? 'var(--green)' : vidPct >= 50 ? 'var(--yellow)' : 'var(--pink)') + ';border-radius:3px;"></div></div>' +
+        '</div>' +
+        '<div class="dpi-grade">' +
+          '<span>Оценка:</span>' +
+          '<input type="number" class="dpi-grade-input" min="0" max="5" value="' + intern.scores[i] + '" data-intern="' + idx + '" data-day="' + i + '" ' + (!done ? 'placeholder="-"' : '') + '>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+
+  document.getElementById('adminNote').value = intern.notes || '';
+
+  setTimeout(() => {
+    document.getElementById('internDetailSection').scrollIntoView({behavior:'smooth'});
+  }, 100);
+}
+
+function saveGrades() {
+  if (currentInternIdx < 0) return;
+  const inputs = document.querySelectorAll('.dpi-grade-input');
+  inputs.forEach(inp => {
+    const idx = parseInt(inp.dataset.intern);
+    const day = parseInt(inp.dataset.day);
+    const val = parseInt(inp.value) || 0;
+    INTERNS[idx].scores[day] = Math.min(5, Math.max(0, val));
+  });
+  INTERNS[currentInternIdx].notes = document.getElementById('adminNote').value;
+
+  // Recalculate points
+  const intern = INTERNS[currentInternIdx];
+  intern.points = intern.scores.reduce((a,b) => a+b, 0);
+  intern.completed = intern.scores.filter(s => s > 0).length;
+
+  showToast('✅', 'Оценки сохранены!', intern.name + ' ' + intern.surname);
+  renderAdmin();
+  setTimeout(() => showInternDetail(currentInternIdx), 50);
+}
+
+// ===== PROFILE =====
+function renderProfile() {
+  document.getElementById('profileAvatar').textContent = state.name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = state.name + ' ' + state.surname;
+  const rank = getRank(state.points);
+  document.getElementById('profileRank').innerHTML = rank.icon + ' ' + rank.name;
+  document.getElementById('profilePoints').textContent = state.points;
+  document.getElementById('profileDays').textContent = state.completed;
+  document.getElementById('profileRewards').textContent = state.rewardsRedeemed;
+  document.getElementById('profileFullName').textContent = state.name + ' ' + state.surname;
+  document.getElementById('profileDate').textContent = state.startDate;
+  document.getElementById('profileEndDate').textContent = state.endDate;
+
+  const doneScores = state.scores.filter(s => s > 0);
+  const avg = doneScores.length ? (doneScores.reduce((a,b)=>a+b,0) / doneScores.length).toFixed(1) : '-';
+  document.getElementById('profileAvg').innerHTML = avg !== '-' ? avg + ' / 5 &#11088;' : '-';
+
+  // Deadline card
+  document.getElementById('deadlineDates').textContent = state.startDate + ' — ' + state.endDate;
+  const daysLeft = Math.max(0, Math.ceil((parseRuDate(state.endDate) - new Date()) / 86400000));
+  const dr = document.getElementById('deadlineRemaining');
+  dr.textContent = daysLeft > 0 ? daysLeft + ' дн. осталось' : 'Срок истёк';
+  dr.className = 'deadline-remaining ' + (daysLeft > 5 ? 'ok' : daysLeft > 2 ? 'warn' : 'danger');
+
+  // Certification status
+  const cert = checkCertification();
+  const csc = document.getElementById('certStatusCard');
+  csc.style.display = 'flex';
+  if (cert.certified) {
+    document.getElementById('certStatusIcon').innerHTML = '&#128220;';
+    document.getElementById('certStatusTitle').textContent = '&#10003; Аттестация пройдена';
+    document.getElementById('certStatusTitle').style.color = '#00a854';
+    document.getElementById('certStatusDesc').textContent = 'Сертификат мастера M&M получен. Допуск к работе: одобрен.';
+    document.getElementById('certStatusBtn').style.display = 'inline-block';
+    document.getElementById('profileAdmission').innerHTML = '<span style="color:var(--green);font-weight:700;">&#10003; Допущен(а)</span>';
+    document.getElementById('profileStatus').innerHTML = '<span style="color:var(--green);">&#128220; Сертифицирован</span>';
+  } else if (state.completed >= 10) {
+    document.getElementById('certStatusIcon').innerHTML = '&#9888;';
+    document.getElementById('certStatusTitle').textContent = 'Аттестация не пройдена';
+    document.getElementById('certStatusTitle').style.color = 'var(--pink)';
+    document.getElementById('certStatusDesc').textContent = 'Средняя оценка ниже 3.5. Необходимо пересдать задания.';
+    document.getElementById('certStatusBtn').style.display = 'none';
+    document.getElementById('profileAdmission').innerHTML = '<span style="color:var(--pink);font-weight:700;">&#10007; Не допущен(а)</span>';
+    document.getElementById('profileStatus').innerHTML = '<span style="color:var(--pink);">Требуется пересдача</span>';
+  } else {
+    document.getElementById('certStatusIcon').innerHTML = '&#128203;';
+    document.getElementById('certStatusTitle').textContent = 'Обучение в процессе';
+    document.getElementById('certStatusTitle').style.color = 'var(--blue)';
+    document.getElementById('certStatusDesc').textContent = 'Пройдено ' + state.completed + '/10 дней. Необходимо ≥ 30 баллов и ср. оценка ≥ 3.5';
+    document.getElementById('certStatusBtn').style.display = 'none';
+    document.getElementById('profileAdmission').innerHTML = '<span style="color:#888;">В процессе</span>';
+    document.getElementById('profileStatus').innerHTML = '<span style="color:var(--green);">Активный стажёр</span>';
+  }
+
+  // Achievements
+  const ac = document.getElementById('achievementsCard');
+  ac.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = a.condition(state);
+    return '<div class="achievement-row" style="'+(unlocked?'':'opacity:0.35;')+'">' +
+      '<div class="achievement-icon" style="background:'+a.bg+';">'+a.icon+'</div>' +
+      '<div class="achievement-info"><div class="ach-name">'+a.name+(unlocked?' &#9989;':'')+'</div>' +
+      '<div class="ach-desc">'+a.desc+'</div></div></div>';
+  }).join('');
+}
+
+function parseRuDate(str) {
+  const p = str.split('.');
+  return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+}
+</script>
+
+</body>
+</html>
