@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeironClinic CRM — Презентация</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#1a73e8;--dark:#1e293b;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--info:#06b6d4;--gradient:linear-gradient(135deg,#1e293b 0%,#0f172a 100%)}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;overflow-x:hidden;scroll-behavior:smooth}
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(30,41,59,.95);backdrop-filter:blur(10px);padding:16px 40px;display:flex;justify-content:space-between;align-items:center}
+.nav-logo{color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
+.nav-links{display:flex;gap:24px}
+.nav-links a{color:#94a3b8;text-decoration:none;font-size:14px;transition:.2s}.nav-links a:hover{color:#fff}
+.nav-cta{background:var(--primary);color:#fff;padding:10px 24px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:.2s}.nav-cta:hover{background:#1557b0}
+/* HERO */
+.hero{min-height:100vh;background:var(--gradient);display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 40px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(26,115,232,.15),transparent 70%);top:-100px;right:-100px}
+.hero-content{max-width:800px;position:relative;z-index:1}
+.hero h1{font-size:56px;color:#fff;margin-bottom:20px;line-height:1.15;letter-spacing:-1px}
+.hero h1 span{background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:20px;color:#94a3b8;margin-bottom:40px;line-height:1.6}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:48px}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:48px;font-weight:800;color:#fff}
+.hero-stat .label{font-size:14px;color:#94a3b8;margin-top:4px}
+.hero-btn{display:inline-block;background:var(--primary);color:#fff;padding:16px 48px;border-radius:12px;font-size:18px;font-weight:700;text-decoration:none;transition:.3s;box-shadow:0 4px 24px rgba(26,115,232,.4)}.hero-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(26,115,232,.5)}
+.hero-btn-outline{display:inline-block;border:2px solid rgba(255,255,255,.2);color:#fff;padding:14px 48px;border-radius:12px;font-size:18px;font-weight:600;text-decoration:none;transition:.3s;margin-left:16px}.hero-btn-outline:hover{border-color:#fff;background:rgba(255,255,255,.05)}
+/* SECTIONS */
+section{padding:100px 40px}
+.section-title{text-align:center;margin-bottom:60px}
+.section-title h2{font-size:40px;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px}
+.section-title p{font-size:18px;color:#64748b;max-width:600px;margin:0 auto}
+.section-alt{background:#f8fafc}
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1000px;margin:0 auto}
+.problem-card{padding:24px;border-radius:12px;border-left:4px solid var(--danger);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.problem-card h4{color:var(--danger);margin-bottom:8px;font-size:16px}
+.problem-card p{font-size:14px;color:#64748b;line-height:1.6}
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto}
+.feature-card{background:#fff;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.06);border:1px solid #e2e8f0;transition:.3s;position:relative;overflow:hidden}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.1)}
+.feature-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
+.feature-card h3{font-size:18px;margin-bottom:10px;font-weight:700}
+.feature-card p{font-size:14px;color:#64748b;line-height:1.6}
+.feature-card .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:12px}
+/* MODULES */
+.modules-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1100px;margin:0 auto}
+.module{background:#fff;border-radius:12px;padding:20px;text-align:center;border:1px solid #e2e8f0;transition:.3s;cursor:default}
+.module:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(26,115,232,.1)}
+.module .icon{font-size:32px;margin-bottom:8px}
+.module h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.module p{font-size:12px;color:#64748b}
+/* FLOW */
+.flow{display:flex;gap:0;max-width:1100px;margin:0 auto;justify-content:center;flex-wrap:wrap}
+.flow-step{flex:1;min-width:180px;text-align:center;padding:24px 16px;position:relative}
+.flow-step::after{content:'';position:absolute;right:-12px;top:50%;width:24px;height:2px;background:#e2e8f0}
+.flow-step:last-child::after{display:none}
+.flow-num{width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin:0 auto 12px}
+.flow-step h4{font-size:15px;margin-bottom:6px}
+.flow-step p{font-size:13px;color:#64748b}
+/* COMPARISON */
+.comparison{max-width:900px;margin:0 auto}
+.comparison table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.comparison th,.comparison td{padding:14px 20px;text-align:center;border-bottom:1px solid #e2e8f0;font-size:14px}
+.comparison th{background:var(--dark);color:#fff;font-weight:600}
+.comparison th:first-child,.comparison td:first-child{text-align:left}
+.comparison tr:hover{background:#f8fafc}
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;margin:0 auto}
+.price-card{background:#fff;border-radius:16px;padding:36px;text-align:center;border:2px solid #e2e8f0;transition:.3s;position:relative}
+.price-card.popular{border-color:var(--primary);box-shadow:0 8px 32px rgba(26,115,232,.15)}
+.price-card.popular::before{content:'Популярный';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:4px 20px;border-radius:20px;font-size:12px;font-weight:700}
+.price-card h3{font-size:20px;margin-bottom:8px}
+.price-card .price{font-size:40px;font-weight:800;color:var(--primary);margin:16px 0}
+.price-card .price span{font-size:16px;font-weight:400;color:#64748b}
+.price-card ul{list-style:none;text-align:left;margin:20px 0;font-size:14px}
+.price-card li{padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px}
+.price-card li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0}
+.price-btn{display:block;padding:14px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none;transition:.3s;border:2px solid var(--primary);color:var(--primary);background:#fff;cursor:pointer}
+.price-btn:hover,.price-card.popular .price-btn{background:var(--primary);color:#fff}
+/* TESTIMONIALS */
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto}
+.test-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.test-card .stars{color:#f59e0b;font-size:16px;margin-bottom:12px}
+.test-card p{font-size:14px;color:#475569;line-height:1.7;margin-bottom:16px;font-style:italic}
+.test-card .author{font-size:13px;font-weight:600;color:var(--dark)}
+.test-card .role{font-size:12px;color:#94a3b8}
+/* ROI */
+.roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto}
+.roi-card{text-align:center;padding:24px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.roi-card .roi-num{font-size:36px;font-weight:800;margin-bottom:4px}
+.roi-card .roi-label{font-size:13px;color:#64748b}
+/* CTA */
+.cta{background:var(--gradient);padding:100px 40px;text-align:center}
+.cta h2{color:#fff;font-size:40px;margin-bottom:16px}
+.cta p{color:#94a3b8;font-size:18px;margin-bottom:40px}
+/* FOOTER */
+.footer{background:#0f172a;color:#94a3b8;padding:40px;text-align:center;font-size:13px}
+.footer a{color:#60a5fa;text-decoration:none}
+/* ANIMATION */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s}.fade-up.visible{opacity:1;transform:none}
+/* RESPONSIVE */
+@media(max-width:768px){
+.hero h1{font-size:32px}.hero p{font-size:16px}.hero-stats{flex-direction:column;gap:20px}
+.features-grid,.pricing-grid,.test-grid{grid-template-columns:1fr}
+.modules-grid{grid-template-columns:repeat(2,1fr)}
+.problem-grid{grid-template-columns:1fr}
+.roi-grid{grid-template-columns:repeat(2,1fr)}
+.flow{flex-direction:column}.flow-step::after{display:none}
+section{padding:60px 20px}
+.nav{padding:12px 20px}.nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+<div class="nav-logo">🧠 NeironClinic CRM</div>
+<div class="nav-links">
+<a href="#problem">Проблема</a>
+<a href="#features">Возможности</a>
+<a href="#modules">Модули</a>
+<a href="#compare">Сравнение</a>
+<a href="#roi">ROI</a>
+<a href="#contact">Контакты</a>
+</div>
+<a href="#contact" class="nav-cta">Связаться</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-content">
+<h1>CRM-система, разработанная <span>специально для вашей клиники</span></h1>
+<p>Мы создадим индивидуальную систему управления под ваши бизнес-процессы: расписание, пациенты, финансы, аналитика. Не шаблонное решение, а продукт, который работает именно так, как нужно вам.</p>
+<div>
+<a href="index.html" class="hero-btn">Посмотреть демо</a>
+<a href="#features" class="hero-btn-outline">Узнать больше</a>
+</div>
+<div class="hero-stats">
+<div class="hero-stat"><div class="num">17</div><div class="label">модулей</div></div>
+<div class="hero-stat"><div class="num">100%</div><div class="label">под ваши процессы</div></div>
+<div class="hero-stat"><div class="num">1</div><div class="label">команда разработки</div></div>
+<div class="hero-stat"><div class="num">24/7</div><div class="label">поддержка</div></div>
+</div>
+</div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem" class="section-alt">
+<div class="section-title">
+<h2>Проблемы клиник без CRM</h2>
+<p>Знакомые ситуации, которые стоят вам денег каждый день</p>
+</div>
+<div class="problem-grid fade-up">
+<div class="problem-card"><h4>Потеря пациентов</h4><p>30% пациентов не возвращаются после первого визита. Нет системы напоминаний и автоматической записи.</p></div>
+<div class="problem-card"><h4>Неявки на приём (no-show)</h4><p>До 20% записей пропадают. Каждая неявка — это ₸15 000-35 000 упущенной выручки.</p></div>
+<div class="problem-card"><h4>Непрозрачные финансы</h4><p>Кассир может вернуть деньги без контроля. Нет сверки между CRM и банком. Расхождения копятся.</p></div>
+<div class="problem-card"><h4>Ручная работа с ОСМС</h4><p>Подача заявок в ФСМС вручную, ошибки в кодах, отклонённые заявки — упущенные деньги от государства.</p></div>
+<div class="problem-card"><h4>Разрозненные данные</h4><p>Мед. карты в Excel, расписание на бумаге, финансы в 1С. Нет единой картины бизнеса.</p></div>
+<div class="problem-card"><h4>Нет аналитики для решений</h4><p>Директор не видит загрузку врачей, конверсию записей, LTV пациентов. Решения принимаются «на глаз».</p></div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+<div class="section-title">
+<h2>Что мы разработаем для вас</h2>
+<p>Каждый модуль адаптируется под ваши бизнес-процессы</p>
+</div>
+<div class="features-grid">
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#dbeafe">📅</div>
+<h3>Умное расписание</h3>
+<p>Сетка записей по врачам и кабинетам. Живая очередь с временем ожидания. Загрузка каждого врача в реальном времени.</p>
+<span class="tag" style="background:#d1fae5;color:#065f46">Экономия 2ч/день администратора</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#fef3c7">🌐</div>
+<h3>Онлайн-запись 24/7</h3>
+<p>Виджет на сайт и WhatsApp. Пациент сам выбирает врача, дату и время. Автоподтверждение и напоминания.</p>
+<span class="tag" style="background:#dbeafe;color:#1e40af">-40% нагрузки на ресепшн</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#d1fae5">📱</div>
+<h3>SMS/WhatsApp уведомления</h3>
+<p>Автоматические напоминания за 24ч и 2ч. Поздравления с ДР. Уведомления о готовности анализов.</p>
+<span class="tag" style="background:#fef3c7;color:#92400e">-60% неявок на приём</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#fee2e2">💰</div>
+<h3>Финансы и ДДС</h3>
+<p>Полный контроль: доходы, расходы, кассы, сверка с банком. Бюджет vs факт. Аудит каждой операции.</p>
+<span class="tag" style="background:#fee2e2;color:#991b1b">0% расхождений в кассе</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#e0e7ff">🏥</div>
+<h3>Возможность подключения ОСМС</h3>
+<p>Система готова к интеграции с ФСМС через API. Реестр заявок, отслеживание статусов, учёт оплат от фонда — подключается по мере готовности клиники.</p>
+<span class="tag" style="background:#e0e7ff;color:#3730a3">Готово к API-подключению</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#cffafe">🧪</div>
+<h3>API лабораторий</h3>
+<p>Автоматический приём результатов из Олимп, InVitro. Привязка к мед. карте по ИИН. Webhook-уведомления.</p>
+<span class="tag" style="background:#cffafe;color:#155e75">Результаты за 0 минут ручной работы</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#fce7f3">🤖</div>
+<h3>ИИ-ассистент врача</h3>
+<p>Подсказки МКБ-10, проверка совместимости препаратов, автозаполнение протоколов осмотра. Учитывает аллергии.</p>
+<span class="tag" style="background:#fce7f3;color:#9d174d">-30% времени на документацию</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#f0fdf4">💊</div>
+<h3>Электронные рецепты</h3>
+<p>Формирование рецептов и направлений из карты. Отправка PDF в WhatsApp. Шаблоны по диагнозам.</p>
+<span class="tag" style="background:#f0fdf4;color:#065f46">Цифровые рецепты за 30 сек</span>
+</div>
+<div class="feature-card fade-up">
+<div class="feature-icon" style="background:#fffbeb">🏢</div>
+<h3>Мультиклиника</h3>
+<p>Единая база на все филиалы. Перевод пациентов между городами. Синхронизация данных через облако.</p>
+<span class="tag" style="background:#fffbeb;color:#92400e">Масштабирование без хаоса</span>
+</div>
+</div>
+</section>
+
+<!-- MODULES -->
+<section class="section-alt" id="modules">
+<div class="section-title">
+<h2>17 модулей — и это только начало</h2>
+<p>Базовый набор, который мы адаптируем и расширим под ваши нужды</p>
+</div>
+<div class="modules-grid fade-up">
+<div class="module"><div class="icon">📊</div><h4>Дашборд</h4><p>KPI в реальном времени</p></div>
+<div class="module"><div class="icon">📅</div><h4>Расписание</h4><p>Сетка, список, очередь</p></div>
+<div class="module"><div class="icon">👥</div><h4>Пациенты</h4><p>Мед. карты, ИИН-поиск</p></div>
+<div class="module"><div class="icon">💰</div><h4>Финансы / ДДС</h4><p>Доходы, расходы, кассы</p></div>
+<div class="module"><div class="icon">🏥</div><h4>ОСМС</h4><p>Готово к API-подключению</p></div>
+<div class="module"><div class="icon">📋</div><h4>Услуги</h4><p>Прайс-лист и тарифы</p></div>
+<div class="module"><div class="icon">👨‍⚕️</div><h4>Сотрудники</h4><p>Графики, зарплаты, права</p></div>
+<div class="module"><div class="icon">📈</div><h4>Отчёты</h4><p>По врачам, услугам, ОСМС</p></div>
+<div class="module"><div class="icon">🔍</div><h4>Аудит / Логи</h4><p>Полная прозрачность</p></div>
+<div class="module"><div class="icon">🌐</div><h4>Онлайн-запись</h4><p>Виджет + QR-код</p></div>
+<div class="module"><div class="icon">📱</div><h4>Уведомления</h4><p>SMS + WhatsApp</p></div>
+<div class="module"><div class="icon">💊</div><h4>Рецепты</h4><p>Электронные + направления</p></div>
+<div class="module"><div class="icon">📊</div><h4>Дашборд директора</h4><p>KPI, воронка, сравнение</p></div>
+<div class="module"><div class="icon">🤖</div><h4>ИИ-ассистент</h4><p>Подсказки врачу</p></div>
+<div class="module"><div class="icon">🏢</div><h4>Мультиклиника</h4><p>Филиалы и синхронизация</p></div>
+<div class="module"><div class="icon">🧪</div><h4>Лаборатории</h4><p>API интеграции</p></div>
+<div class="module"><div class="icon">⚙️</div><h4>Настройки</h4><p>Роли и доступ</p></div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+<div class="section-title">
+<h2>Как это работает</h2>
+<p>От записи до отчёта — за 5 шагов</p>
+</div>
+<div class="flow fade-up">
+<div class="flow-step">
+<div class="flow-num">1</div>
+<h4>Запись</h4>
+<p>Пациент записывается онлайн или по телефону. Система проверяет ИИН.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">2</div>
+<h4>Напоминание</h4>
+<p>WhatsApp-напоминание за 24ч и 2ч. Снижение неявок на 60%.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">3</div>
+<h4>Приём</h4>
+<p>Врач видит полную карту: аллергии, диагнозы, анализы. ИИ подсказывает.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">4</div>
+<h4>Оплата</h4>
+<p>Касса + карта + ОСМС. Автоматическая сверка. Аудит каждой операции.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">5</div>
+<h4>Аналитика</h4>
+<p>Директор видит KPI, загрузку, выручку. Решения на основе данных.</p>
+</div>
+</div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section-alt" id="compare">
+<div class="section-title">
+<h2>Почему индивидуальная разработка</h2>
+<p>Сравнение нашего подхода с готовыми решениями на рынке</p>
+</div>
+<div class="comparison fade-up">
+<table>
+<tr><th style="width:30%">Функция</th><th>Наша разработка</th><th>Excel + 1C</th><th>Alteg.io</th><th>Другие CRM</th></tr>
+<tr><td>Мед. карты с ИИН</td><td style="color:var(--success);font-weight:700">Да</td><td style="color:var(--danger)">Нет</td><td>Частично</td><td>Частично</td></tr>
+<tr><td>ОСМС/ФСМС (API-готовность)</td><td style="color:var(--success);font-weight:700">Готово к подключению</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td></tr>
+<tr><td>WhatsApp уведомления</td><td style="color:var(--success);font-weight:700">Да</td><td style="color:var(--danger)">Нет</td><td>Да</td><td>Частично</td></tr>
+<tr><td>API лабораторий (Олимп, InVitro)</td><td style="color:var(--success);font-weight:700">Да</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td></tr>
+<tr><td>ИИ-ассистент врача</td><td style="color:var(--success);font-weight:700">Да</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td></tr>
+<tr><td>Мультиклиника</td><td style="color:var(--success);font-weight:700">Да</td><td>Вручную</td><td>Да</td><td>Частично</td></tr>
+<tr><td>Финансовый аудит</td><td style="color:var(--success);font-weight:700">Полный</td><td>Частично</td><td>Базовый</td><td>Базовый</td></tr>
+<tr><td>Электронные рецепты</td><td style="color:var(--success);font-weight:700">Да</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Нет</td></tr>
+<tr><td>Адаптация под вашу клинику</td><td style="color:var(--success);font-weight:700">100% под вас</td><td style="color:var(--danger)">Нет</td><td style="color:var(--danger)">Шаблон</td><td style="color:var(--danger)">Шаблон</td></tr>
+<tr><td>Доработки под ваши процессы</td><td style="color:var(--success);font-weight:700">Без ограничений</td><td>Самостоятельно</td><td style="color:var(--danger)">Только платно</td><td>Ограничено</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ROI -->
+<section id="roi">
+<div class="section-title">
+<h2>Что вы получите</h2>
+<p>Ожидаемые результаты после внедрения системы</p>
+</div>
+<div class="roi-grid fade-up">
+<div class="roi-card"><div class="roi-num" style="color:var(--success)">+35%</div><div class="roi-label">Рост выручки за 6 мес</div></div>
+<div class="roi-card"><div class="roi-num" style="color:var(--primary)">-60%</div><div class="roi-label">Снижение неявок</div></div>
+<div class="roi-card"><div class="roi-num" style="color:var(--warning)">2ч/день</div><div class="roi-label">Экономия времени персонала</div></div>
+<div class="roi-card"><div class="roi-num" style="color:var(--info)">100%</div><div class="roi-label">Прозрачность финансов</div></div>
+</div>
+</section>
+
+<!-- WHY US -->
+<section class="section-alt">
+<div class="section-title">
+<h2>Почему мы</h2>
+<p>Индивидуальная разработка, а не шаблонное решение</p>
+</div>
+<div class="features-grid fade-up" style="grid-template-columns:repeat(3,1fr)">
+<div class="feature-card" style="text-align:center">
+<div style="font-size:48px;margin-bottom:16px">🎯</div>
+<h3>Под ваши процессы</h3>
+<p>Мы изучим как работает именно ваша клиника и построим систему вокруг ваших бизнес-процессов. Не вы подстраиваетесь под CRM, а CRM — под вас.</p>
+</div>
+<div class="feature-card" style="text-align:center">
+<div style="font-size:48px;margin-bottom:16px">🔧</div>
+<h3>Гибкие доработки</h3>
+<p>Любые изменения и новые функции — без ограничений. Система растёт вместе с вашей клиникой. Новый филиал? Новая услуга? Добавим.</p>
+</div>
+<div class="feature-card" style="text-align:center">
+<div style="font-size:48px;margin-bottom:16px">🤝</div>
+<h3>Прямая коммуникация</h3>
+<p>Работаете напрямую с разработчиком. Никаких тикетов в поддержку и ожидания по 3 дня. Быстрые правки и оперативная обратная связь.</p>
+</div>
+</div>
+</section>
+
+<!-- PROCESS -->
+<section>
+<div class="section-title">
+<h2>Как мы работаем</h2>
+<p>Прозрачный процесс от идеи до внедрения</p>
+</div>
+<div class="flow fade-up">
+<div class="flow-step">
+<div class="flow-num">1</div>
+<h4>Встреча</h4>
+<p>Изучаем ваши процессы, боли и задачи. Понимаем, что нужно именно вам.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">2</div>
+<h4>Прототип</h4>
+<p>Показываем рабочий прототип системы. Вы видите результат до начала полной разработки.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">3</div>
+<h4>Разработка</h4>
+<p>Создаём систему итерациями. Каждую неделю — новый функционал для проверки.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">4</div>
+<h4>Внедрение</h4>
+<p>Запускаем систему, обучаем персонал. Помогаем перенести данные.</p>
+</div>
+<div class="flow-step">
+<div class="flow-num">5</div>
+<h4>Поддержка</h4>
+<p>Остаёмся на связи. Доработки, обновления и техподдержка.</p>
+</div>
+</div>
+</section>
+
+<!-- CTA / CONTACT -->
+<section class="cta" id="contact">
+<h2>Давайте обсудим вашу систему</h2>
+<p>Посмотрите интерактивное демо или свяжитесь со мной для обсуждения проекта</p>
+<div>
+<a href="index.html" class="hero-btn" style="font-size:20px;padding:18px 56px">Посмотреть демо CRM</a>
+</div>
+<div style="margin-top:48px;display:flex;gap:40px;justify-content:center;flex-wrap:wrap">
+<div style="text-align:center">
+<div style="font-size:32px;margin-bottom:8px">📞</div>
+<div style="color:#fff;font-size:20px;font-weight:700">+7 705 184 35 39</div>
+<div style="color:#94a3b8;font-size:14px;margin-top:4px">Звонок / WhatsApp</div>
+</div>
+<div style="text-align:center">
+<div style="font-size:32px;margin-bottom:8px">👤</div>
+<div style="color:#fff;font-size:20px;font-weight:700">Мадияр</div>
+<div style="color:#94a3b8;font-size:14px;margin-top:4px">Разработчик</div>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+<p style="margin-bottom:8px"><strong style="color:#fff">Индивидуальная разработка CRM для медицинских клиник</strong></p>
+<p>Казахстан. Адаптация под ОСМС, ИИН, ФСМС и ваши бизнес-процессы.</p>
+<p style="margin-top:16px;font-size:12px;color:#475569">Мадияр | +7 705 184 35 39 | Все данные в демо являются вымышленными.</p>
+</div>
+
+<script>
+// Fade-in animation on scroll
+const observer=new IntersectionObserver((entries)=>{
+entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible')}});
+},{threshold:0.1});
+document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
+
+// Smooth scroll for nav links
+document.querySelectorAll('.nav-links a, .nav-cta').forEach(a=>{
+a.addEventListener('click',e=>{
+const href=a.getAttribute('href');
+if(href.startsWith('#')){
+e.preventDefault();
+document.querySelector(href)?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+});
+});
+</script>
+</body>
+</html>
