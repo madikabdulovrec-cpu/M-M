@@ -1,0 +1,35 @@
+# Claude Code локальные настройки
+.claude/
+
+# Системные файлы ОС
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Бэкапы и временные версии HTML
+*.html.html
+*.html.local
+*.html.bak
+*.html.orig
+
+# Закодированные base64 копии изображений (генерятся, не нужны в репо)
+*.b64
+
+# WebP-копии изображений (генерятся из исходных)
+*.jpg.webp
+*.png.webp
+
+# Питоновский кеш
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Локальные секреты
+.env
+.env.local
+secrets.json
