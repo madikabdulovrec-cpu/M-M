@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&M Fabrica — Карточки клиентов</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase (заглушка — config подставим ниже) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --yellow:#FFE600; --pink:#FF2D7B; --blue:#2D5BFF; --green:#00E676;
+  --black:#1A1A1A; --white:#FFFFFF; --cream:#EDF4FC; --gray:#E8EFF8;
+  --border:2px solid rgba(0,0,0,0.06);
+  --shadow:0 6px 20px rgba(0,0,0,0.08);
+  --shadow-sm:0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg:0 12px 35px rgba(0,0,0,0.1);
+  --radius:16px; --radius-lg:24px; --radius-pill:50px;
+}
+body { font-family:'Space Grotesk',sans-serif; background:var(--cream); color:var(--black); min-height:100vh; }
+
+.screen { display:none; min-height:100vh; }
+.screen.active { display:block; }
+
+/* ===== LOGIN ===== */
+.login-screen { display:none; align-items:center; justify-content:center; min-height:100vh; background:var(--yellow); position:relative; overflow:hidden; }
+.login-screen.active { display:flex; }
+.login-screen::before {
+  content:''; position:absolute; inset:0;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size: 20px 20px; pointer-events:none;
+}
+.float-shape { position:absolute; border-radius:50%; z-index:0; }
+.float-shape.s1 { width:180px; height:180px; background:var(--pink); top:-40px; right:-40px; opacity:0.6; }
+.float-shape.s2 { width:120px; height:120px; background:var(--blue); bottom:-30px; left:-30px; opacity:0.5; }
+.float-shape.s3 { width:80px; height:80px; background:var(--green); top:50%; right:15%; opacity:0.4; }
+
+.login-box {
+  background:var(--white); border-radius:var(--radius-lg); padding:50px 40px; width:460px;
+  text-align:center; border:2px solid var(--black); box-shadow:var(--shadow-lg); position:relative; z-index:1;
+}
+.login-box .logo { font-family:'Unbounded',sans-serif; font-size:30px; font-weight:800; margin-bottom:8px; letter-spacing:.05em; }
+.login-box .logo span { color:var(--pink); }
+.login-box .subtitle { color:#888; font-size:13px; margin-bottom:30px; font-weight:500; text-transform:uppercase; letter-spacing:.1em; }
+.role-toggle { display:flex; gap:0; margin-bottom:24px; background:var(--gray); border-radius:var(--radius-pill); padding:4px; border:2px solid rgba(0,0,0,0.06); }
+.role-btn { flex:1; padding:12px 16px; background:transparent; border:none; border-radius:var(--radius-pill); font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:#999; cursor:pointer; transition:all .3s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.role-btn.active { background:var(--white); color:var(--black); box-shadow:var(--shadow-sm); }
+.role-btn.admin-active { background:linear-gradient(135deg,var(--blue),#1a3fcc); color:#fff; }
+.login-box input { width:100%; padding:15px 18px; background:var(--gray); border:2px solid rgba(0,0,0,0.08); border-radius:14px; color:var(--black); font-size:15px; font-family:'Space Grotesk',sans-serif; margin-bottom:12px; outline:none; transition:.3s; }
+.login-box input:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(255,45,123,.1); }
+.login-box .btn-enter { width:100%; padding:16px; background:var(--pink); color:#fff; border:2px solid var(--black); border-radius:var(--radius-pill); font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600; cursor:pointer; margin-top:10px; box-shadow:var(--shadow); transition:.2s; letter-spacing:.05em; }
+.login-box .btn-enter:hover { transform:translate(-2px,-2px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+.login-box .login-error { color:var(--pink); font-size:13px; font-weight:600; margin-top:10px; display:none; }
+.login-box .hint { color:#aaa; font-size:11px; margin-top:18px; line-height:1.5; }
+
+/* ===== TOPBAR ===== */
+.topbar { background:var(--white); border-bottom:2px solid var(--black); padding:18px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+.topbar .brand { font-family:'Unbounded',sans-serif; font-size:20px; font-weight:800; letter-spacing:.05em; cursor:pointer; }
+.topbar .brand span { color:var(--pink); }
+.topbar nav { display:flex; gap:8px; }
+.nav-btn { padding:10px 18px; background:transparent; border:2px solid transparent; border-radius:var(--radius-pill); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; color:#666; cursor:pointer; transition:.2s; }
+.nav-btn:hover { background:var(--gray); color:var(--black); }
+.nav-btn.active { background:var(--black); color:var(--white); }
+.user-chip { display:flex; align-items:center; gap:10px; padding:8px 14px 8px 8px; background:var(--gray); border-radius:var(--radius-pill); font-size:13px; font-weight:600; }
+.user-chip .av { width:32px; height:32px; border-radius:50%; background:var(--pink); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Unbounded',sans-serif; font-size:12px; font-weight:700; }
+.user-chip .role { color:#888; font-size:11px; text-transform:uppercase; letter-spacing:.1em; }
+.btn-logout { padding:8px 14px; background:transparent; border:1.5px solid rgba(0,0,0,.1); border-radius:var(--radius-pill); font-size:12px; font-weight:600; color:#666; cursor:pointer; }
+.btn-logout:hover { background:#FFE5EC; color:var(--pink); border-color:var(--pink); }
+.cloud-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--radius-pill); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; }
+.cloud-badge.on { background:#E8FFF1; color:#00A653; }
+.cloud-badge.off { background:#FFE5EC; color:var(--pink); }
+.cloud-badge .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* ===== CONTAINER ===== */
+.page { max-width:1280px; margin:0 auto; padding:32px; }
+.page-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
+.page-title { font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800; }
+.page-sub { color:#888; font-size:14px; margin-top:4px; }
+
+/* ===== BUTTONS ===== */
+.btn { padding:12px 22px; border:2px solid var(--black); border-radius:var(--radius-pill); font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; gap:8px; }
+.btn-primary { background:var(--pink); color:#fff; box-shadow:var(--shadow); }
+.btn-primary:hover { transform:translate(-2px,-2px); box-shadow:0 14px 30px rgba(255,45,123,.25); }
+.btn-dark { background:var(--black); color:#fff; }
+.btn-dark:hover { transform:translate(-2px,-2px); }
+.btn-light { background:var(--white); color:var(--black); }
+.btn-light:hover { background:var(--gray); }
+.btn-yellow { background:var(--yellow); color:var(--black); }
+.btn-ghost { padding:10px 18px; background:transparent; border:1.5px solid rgba(0,0,0,.1); border-radius:var(--radius-pill); font-size:13px; font-weight:600; color:#666; cursor:pointer; }
+.btn-ghost:hover { background:var(--gray); color:var(--black); }
+.btn-danger { background:#FFE5EC; color:var(--pink); border:2px solid var(--pink); }
+.btn-danger:hover { background:var(--pink); color:#fff; }
+
+/* ===== SEARCH BAR ===== */
+.search-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
+.search-input { flex:1; min-width:240px; padding:14px 20px; background:var(--white); border:2px solid rgba(0,0,0,.06); border-radius:var(--radius-pill); font-size:14px; font-family:'Space Grotesk',sans-serif; outline:none; transition:.3s; }
+.search-input:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(255,45,123,.08); }
+.filter-select { padding:14px 20px; background:var(--white); border:2px solid rgba(0,0,0,.06); border-radius:var(--radius-pill); font-size:14px; font-family:'Space Grotesk',sans-serif; outline:none; cursor:pointer; }
+
+/* ===== CLIENT CARDS ===== */
+.client-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:18px; }
+.client-card { background:var(--white); border:2px solid var(--black); border-radius:var(--radius-lg); padding:22px; cursor:pointer; transition:.2s; box-shadow:var(--shadow-sm); position:relative; overflow:hidden; }
+.client-card::before { content:''; position:absolute; top:0; left:0; right:0; height:6px; background:linear-gradient(90deg,var(--pink),var(--yellow)); }
+.client-card:hover { transform:translate(-3px,-3px); box-shadow:var(--shadow-lg); }
+.client-card .name { font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; margin:8px 0 4px; }
+.client-card .meta { color:#888; font-size:13px; margin-bottom:14px; }
+.client-card .stats { display:flex; gap:14px; flex-wrap:wrap; padding-top:14px; border-top:1.5px solid var(--gray); font-size:12px; color:#666; }
+.client-card .stats span b { color:var(--black); font-weight:700; }
+.client-card .specialist { display:inline-block; padding:4px 10px; background:var(--gray); border-radius:var(--radius-pill); font-size:11px; font-weight:600; color:#666; margin-top:6px; }
+
+.empty-state { text-align:center; padding:80px 20px; color:#888; }
+.empty-state .ic { font-size:56px; margin-bottom:16px; }
+.empty-state h3 { font-family:'Unbounded',sans-serif; font-size:20px; color:var(--black); margin-bottom:8px; }
+
+/* ===== FORM ===== */
+.form-card { background:var(--white); border:2px solid var(--black); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow); max-width:880px; margin:0 auto; }
+.form-section { margin-bottom:28px; }
+.form-section h3 { font-family:'Unbounded',sans-serif; font-size:16px; font-weight:700; margin-bottom:14px; color:var(--black); display:flex; align-items:center; gap:10px; }
+.form-section h3::before { content:''; width:6px; height:22px; background:var(--pink); border-radius:3px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-row.three { grid-template-columns:repeat(3,1fr); }
+.form-field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.form-field label { font-size:12px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.05em; }
+.form-field label .req { color:var(--pink); margin-left:3px; }
+.form-field input, .form-field textarea, .form-field select {
+  width:100%; padding:13px 16px; background:var(--gray); border:2px solid rgba(0,0,0,.06);
+  border-radius:12px; font-size:14px; font-family:'Space Grotesk',sans-serif; outline:none; transition:.3s; resize:vertical;
+}
+.form-field textarea { min-height:90px; font-family:'Space Grotesk',sans-serif; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(255,45,123,.08); background:#fff; }
+.checkbox-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:8px; }
+.check-pill { display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--gray); border:2px solid rgba(0,0,0,.06); border-radius:12px; cursor:pointer; transition:.2s; font-size:13px; user-select:none; }
+.check-pill:hover { background:#dbe6f5; }
+.check-pill input { width:16px; height:16px; cursor:pointer; accent-color:var(--pink); }
+.check-pill.checked { background:#FFE5EC; border-color:var(--pink); color:var(--pink); font-weight:600; }
+
+.form-actions { display:flex; gap:12px; justify-content:space-between; margin-top:30px; padding-top:24px; border-top:2px solid var(--gray); }
+
+/* === PHOTO GALLERY === */
+.photo-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+.photo-tile { position:relative; aspect-ratio:1/1; background:var(--gray); border:2px solid rgba(0,0,0,.08); border-radius:14px; overflow:hidden; }
+.photo-tile img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
+.photo-tile.uploading { display:flex; align-items:center; justify-content:center; color:#888; font-size:12px; flex-direction:column; gap:8px; }
+.photo-tile .caption-input { position:absolute; left:6px; right:6px; bottom:6px; padding:6px 10px; background:rgba(255,255,255,.95); border:1.5px solid rgba(0,0,0,.1); border-radius:8px; font-size:11px; outline:none; font-family:'Space Grotesk',sans-serif; }
+.photo-tile .photo-del { position:absolute; top:6px; right:6px; width:26px; height:26px; border-radius:50%; background:rgba(0,0,0,.7); color:#fff; border:none; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; line-height:1; }
+.photo-tile .photo-del:hover { background:var(--pink); }
+.photo-readonly { position:relative; aspect-ratio:1/1; background:var(--gray); border-radius:12px; overflow:hidden; cursor:zoom-in; }
+.photo-readonly img { width:100%; height:100%; object-fit:cover; }
+.photo-readonly .cap { position:absolute; left:0; right:0; bottom:0; padding:6px 10px; background:linear-gradient(transparent, rgba(0,0,0,.7)); color:#fff; font-size:11px; font-weight:600; }
+
+/* ===== CARD VIEW ===== */
+.card-grid { display:grid; grid-template-columns:1fr 360px; gap:24px; }
+@media (max-width:900px) { .card-grid { grid-template-columns:1fr; } }
+.info-block { background:var(--white); border:2px solid var(--black); border-radius:var(--radius-lg); padding:26px; margin-bottom:18px; box-shadow:var(--shadow-sm); }
+.info-block h4 { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:14px; color:#666; }
+.info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray); font-size:14px; }
+.info-row:last-child { border-bottom:none; }
+.info-row .k { color:#888; }
+.info-row .v { font-weight:600; text-align:right; max-width:60%; word-break:break-word; }
+.tag-list { display:flex; flex-wrap:wrap; gap:6px; }
+.tag { padding:5px 12px; background:var(--gray); border-radius:var(--radius-pill); font-size:12px; font-weight:600; color:#444; }
+.tag.pink { background:#FFE5EC; color:var(--pink); }
+.tag.blue { background:#E5EBFF; color:var(--blue); }
+
+/* ===== PROGRESS / SESSIONS ===== */
+.session-list { display:flex; flex-direction:column; gap:14px; }
+.session-item { background:var(--white); border:2px solid rgba(0,0,0,.08); border-radius:var(--radius); padding:16px; transition:.2s; }
+.session-item:hover { border-color:var(--black); }
+.session-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.session-date { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; }
+.session-photos { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.photo-cell { aspect-ratio:1/1; background:var(--gray); border-radius:12px; overflow:hidden; position:relative; cursor:pointer; }
+.photo-cell img { width:100%; height:100%; object-fit:cover; }
+.photo-cell .label { position:absolute; top:8px; left:8px; padding:3px 10px; background:rgba(0,0,0,.7); color:#fff; border-radius:var(--radius-pill); font-size:10px; font-weight:600; text-transform:uppercase; }
+.photo-cell.empty { display:flex; align-items:center; justify-content:center; color:#aaa; font-size:13px; flex-direction:column; gap:6px; }
+.photo-cell.empty .ic { font-size:32px; opacity:.4; }
+.session-notes { margin-top:10px; padding:10px 12px; background:var(--gray); border-radius:10px; font-size:13px; line-height:1.5; color:#444; }
+
+/* ===== ADMIN ===== */
+.master-row { background:var(--white); border:2px solid rgba(0,0,0,.08); border-radius:var(--radius); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.master-row .info { display:flex; align-items:center; gap:12px; }
+.master-row .av { width:40px; height:40px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:14px; }
+.master-row .av.pink { background:var(--pink); }
+.master-row .nm { font-weight:700; font-size:14px; }
+.master-row .meta { font-size:12px; color:#888; }
+.master-row .controls { display:flex; gap:8px; }
+
+/* ===== MODAL ===== */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-bg.active { display:flex; }
+.modal { background:var(--white); border:2px solid var(--black); border-radius:var(--radius-lg); padding:28px; max-width:500px; width:100%; box-shadow:var(--shadow-lg); max-height:90vh; overflow-y:auto; }
+.modal h3 { font-family:'Unbounded',sans-serif; font-size:20px; margin-bottom:16px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+/* ===== TOAST ===== */
+.toast { position:fixed; top:24px; right:24px; z-index:300; background:var(--white); border:2px solid var(--black); border-radius:var(--radius); padding:14px 20px; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:10px; font-weight:600; font-size:13px; transform:translateX(120%); transition:transform .4s cubic-bezier(.34,1.56,.64,1); max-width:340px; }
+.toast.show { transform:translateX(0); }
+.toast.success { border-color:var(--green); }
+.toast.error { border-color:var(--pink); }
+
+/* ===== PHOTO VIEWER ===== */
+.viewer-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:400; align-items:center; justify-content:center; cursor:zoom-out; }
+.viewer-bg.active { display:flex; }
+.viewer-bg img { max-width:90vw; max-height:90vh; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:680px) {
+  .topbar { padding:14px 18px; flex-wrap:wrap; gap:10px; }
+  .topbar nav { order:3; width:100%; overflow-x:auto; }
+  .page { padding:18px; }
+  .page-title { font-size:22px; }
+  .form-row, .form-row.three { grid-template-columns:1fr; }
+  .login-box { padding:38px 26px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====================================================================== -->
+<!-- LOGIN SCREEN                                                            -->
+<!-- ====================================================================== -->
+<div id="loginScreen" class="screen login-screen active">
+  <div class="float-shape s1"></div>
+  <div class="float-shape s2"></div>
+  <div class="float-shape s3"></div>
+
+  <div class="login-box">
+    <div class="logo">M&M <span>FABRICA</span></div>
+    <div class="subtitle">Карточки клиентов</div>
+
+    <div class="role-toggle">
+      <button class="role-btn active" data-role="master" onclick="setRole('master')">
+        <span>👤</span> Мастер
+      </button>
+      <button class="role-btn" data-role="admin" onclick="setRole('admin')">
+        <span>⚙️</span> Суперадмин
+      </button>
+    </div>
+
+    <input type="text" id="loginUser" placeholder="Логин">
+    <input type="password" id="loginPass" placeholder="Пароль">
+
+    <button class="btn-enter" onclick="doLogin()">Войти</button>
+    <div class="login-error" id="loginError">Неверный логин или пароль</div>
+    <div class="hint">
+      Доступ выдаёт суперадмин<br>
+      Демо: <b>admin / mmclients2026</b>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- TOPBAR (общая для всех экранов после логина)                            -->
+<!-- ====================================================================== -->
+<div id="topbar" class="topbar" style="display:none;">
+  <div class="brand" onclick="showScreen('dashScreen')">M&M <span>•</span> Карточки</div>
+  <nav id="mainNav">
+    <button class="nav-btn active" data-tab="dashScreen" onclick="showScreen('dashScreen')">Клиенты</button>
+    <button class="nav-btn" data-tab="adminScreen" onclick="showScreen('adminScreen')" id="navAdmin" style="display:none;">Управление</button>
+  </nav>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span id="cloudBadge" class="cloud-badge off"><span class="dot"></span><span id="cloudBadgeText">Локально</span></span>
+    <div class="user-chip">
+      <div class="av" id="userAv">M</div>
+      <div>
+        <div id="userName">—</div>
+        <div class="role" id="userRole">мастер</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Выйти</button>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- DASHBOARD                                                               -->
+<!-- ====================================================================== -->
+<div id="dashScreen" class="screen">
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Клиенты</div>
+        <div class="page-sub" id="dashSub">Всего карточек: 0</div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-light" onclick="exportClients()">⬇ Экспорт</button>
+        <button class="btn btn-primary" onclick="openClientForm()">+ Новый клиент</button>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Поиск по ФИО, телефону или жалобам..." oninput="renderClientList()">
+      <select class="filter-select" id="filterSpecialist" onchange="renderClientList()">
+        <option value="">Все специалисты</option>
+      </select>
+      <select class="filter-select" id="sortBy" onchange="renderClientList()">
+        <option value="updated">Сначала обновлённые</option>
+        <option value="created">Сначала новые</option>
+        <option value="name">По алфавиту</option>
+      </select>
+    </div>
+
+    <div id="clientList" class="client-grid"></div>
+    <div id="clientEmpty" class="empty-state" style="display:none;">
+      <div class="ic">📋</div>
+      <h3>Карточек ещё нет</h3>
+      <p>Нажмите «+ Новый клиент», чтобы завести первую карточку</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- CLIENT FORM (создание/редактирование анкеты)                            -->
+<!-- ====================================================================== -->
+<div id="clientFormScreen" class="screen">
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <div class="page-title" id="formTitle">Новая карточка клиента</div>
+        <div class="page-sub">Консультационный лист «Фабрика Красивых Тел М&M»</div>
+      </div>
+      <button class="btn-ghost" onclick="showScreen('dashScreen')">← Назад</button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-section">
+        <h3>Основное</h3>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Дата консультации</label>
+            <input type="date" id="f_date">
+          </div>
+          <div class="form-field">
+            <label>Специалист</label>
+            <input type="text" id="f_specialist" placeholder="ФИО мастера">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>ФИО клиента <span class="req">*</span></label>
+          <input type="text" id="f_fio" placeholder="Иванова Анна Петровна">
+        </div>
+        <div class="form-field">
+          <label>Телефон <span style="color:#aaa; font-weight:400;">(для связи и Altegio)</span></label>
+          <input type="tel" id="f_phone" placeholder="+7 ___ ___ __ __">
+        </div>
+        <div class="form-row three">
+          <div class="form-field">
+            <label>Возраст <span class="req">*</span></label>
+            <input type="text" id="f_age" placeholder="35">
+          </div>
+          <div class="form-field">
+            <label>Вес (кг)</label>
+            <input type="text" id="f_weight" placeholder="65">
+          </div>
+          <div class="form-field">
+            <label>Рост (см)</label>
+            <input type="text" id="f_height" placeholder="168">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Источник</h3>
+        <label style="font-size:12px; color:#666; font-weight:600; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:8px;">Откуда узнали о нас</label>
+        <div class="checkbox-grid" id="sourceGrid"></div>
+      </div>
+
+      <div class="form-section">
+        <h3>Жалобы и пожелания</h3>
+        <div class="form-field">
+          <textarea id="f_complaints" placeholder="Что беспокоит клиента, какой результат хочет получить..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Анамнез и состояние здоровья</h3>
+        <label style="font-size:12px; color:#666; font-weight:600; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:8px;">Отметьте всё подходящее</label>
+        <div class="checkbox-grid" id="anamnesisGrid"></div>
+        <div class="form-field" style="margin-top:14px;">
+          <label>Другое (уточнить)</label>
+          <textarea id="f_anamnesisOther" placeholder="Дополнительные сведения о здоровье..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Рекомендации специалиста</h3>
+        <div class="form-field">
+          <textarea id="f_recommendations" placeholder="Назначенные процедуры, домашний уход, частота посещений..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Фото на момент консультации</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:14px; line-height:1.5;">Загрузите фото проблемных зон — спереди, сзади, сбоку. Эти фото станут точкой отсчёта для отслеживания прогресса.</p>
+        <div class="photo-gallery" id="initialPhotoGrid"></div>
+        <button type="button" class="btn btn-light" onclick="addInitialPhoto()" style="margin-top:12px;">📷 Добавить фото</button>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-danger" id="btnDelete" onclick="deleteClient()" style="display:none;">Удалить карточку</button>
+        <div style="display:flex; gap:10px; margin-left:auto;">
+          <button class="btn btn-light" onclick="showScreen('dashScreen')">Отмена</button>
+          <button class="btn btn-primary" onclick="saveClient()">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- CLIENT CARD (просмотр + прогресс)                                       -->
+<!-- ====================================================================== -->
+<div id="clientCardScreen" class="screen">
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <div class="page-title" id="cardName">—</div>
+        <div class="page-sub" id="cardSub">—</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="showScreen('dashScreen')">← К списку</button>
+        <button class="btn btn-light" onclick="editCurrentClient()">✎ Редактировать</button>
+        <button class="btn btn-yellow" onclick="openAltegio()" id="btnAltegio" style="display:none;">↗ Открыть в Altegio</button>
+        <button class="btn btn-primary" onclick="openSessionForm()">+ Новая сессия</button>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div>
+        <div class="info-block">
+          <h4>📋 Анкета</h4>
+          <div id="cardInfoBlock"></div>
+        </div>
+
+        <div class="info-block">
+          <h4>📈 Прогресс — фото до/после</h4>
+          <div class="session-list" id="sessionList"></div>
+          <div id="sessionEmpty" class="empty-state" style="display:none; padding:40px 10px;">
+            <div class="ic">📷</div>
+            <p>Сессий ещё нет</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="info-block">
+          <h4>🔗 Связь с Altegio</h4>
+          <div class="info-row"><span class="k">ID клиента</span><span class="v" id="altegioId">—</span></div>
+          <div class="info-row"><span class="k">Ссылка</span><span class="v" id="altegioLink" style="word-break:break-all;">—</span></div>
+          <div style="display:flex; gap:8px; margin-top:14px; flex-direction:column;">
+            <button class="btn btn-light" onclick="setAltegioLink()" style="font-size:12px;">Указать ссылку Altegio</button>
+            <button class="btn btn-yellow" onclick="copyShareLink()" style="font-size:12px;">📋 Скопировать ссылку на карточку</button>
+          </div>
+          <p style="font-size:11px; color:#888; margin-top:12px; line-height:1.5;">
+            Скопируйте ссылку и вставьте её в комментарий клиента в Altegio для перелинковки. Когда получите API-токен Altegio, синк будет автоматическим.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ADMIN SCREEN                                                            -->
+<!-- ====================================================================== -->
+<div id="adminScreen" class="screen">
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Управление</div>
+        <div class="page-sub">Аккаунты мастеров и общий контроль</div>
+      </div>
+      <button class="btn btn-primary" onclick="openMasterForm()">+ Добавить мастера</button>
+    </div>
+
+    <div class="info-block">
+      <h4>👥 Мастера и доступ</h4>
+      <div id="masterList"></div>
+      <div id="masterEmpty" class="empty-state" style="display:none; padding:40px 10px;">
+        <p>Мастеров ещё нет. Добавьте первого, чтобы выдать ему доступ.</p>
+      </div>
+    </div>
+
+    <div class="info-block">
+      <h4>⚙️ Системное</h4>
+      <div class="info-row"><span class="k">Суперадмин</span><span class="v">admin</span></div>
+      <div class="info-row"><span class="k">Карточек клиентов</span><span class="v" id="sysClientsCount">0</span></div>
+      <div class="info-row"><span class="k">Сессий с фото</span><span class="v" id="sysSessionsCount">0</span></div>
+      <div class="info-row"><span class="k">Облако (Firebase)</span><span class="v" id="sysCloud">Не настроено</span></div>
+      <div class="info-row"><span class="k">Cloudinary (фото)</span><span class="v" id="sysCloudinary">Не настроено</span></div>
+      <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="exportClients()">⬇ Экспорт JSON</button>
+        <button class="btn-ghost" onclick="importClients()">⬆ Импорт JSON</button>
+        <button class="btn-ghost" style="color:var(--pink); border-color:var(--pink);" onclick="resetAll()">🗑 Сбросить всё (демо)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- MODAL: новый/редакт. мастера                                            -->
+<!-- ====================================================================== -->
+<div class="modal-bg" id="masterModal">
+  <div class="modal">
+    <h3 id="masterModalTitle">Добавить мастера</h3>
+    <div class="form-field">
+      <label>Имя мастера</label>
+      <input type="text" id="m_name" placeholder="Анна Петрова">
+    </div>
+    <div class="form-field">
+      <label>Логин</label>
+      <input type="text" id="m_login" placeholder="anna">
+    </div>
+    <div class="form-field">
+      <label>Пароль</label>
+      <input type="text" id="m_pass" placeholder="не короче 4 символов">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-light" onclick="closeMasterForm()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveMaster()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- MODAL: новая сессия (фото до/после)                                     -->
+<!-- ====================================================================== -->
+<div class="modal-bg" id="sessionModal">
+  <div class="modal" style="max-width:560px;">
+    <h3 id="sessionModalTitle">Новая сессия</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Дата</label>
+        <input type="date" id="s_date">
+      </div>
+      <div class="form-field">
+        <label>Специалист</label>
+        <input type="text" id="s_specialist" placeholder="ФИО мастера">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Фото ДО</label>
+        <div class="photo-cell empty" id="photoBeforeCell" onclick="uploadPhoto('before')" style="aspect-ratio:1/1;">
+          <div class="ic">📷</div><span>Загрузить</span>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Фото ПОСЛЕ</label>
+        <div class="photo-cell empty" id="photoAfterCell" onclick="uploadPhoto('after')" style="aspect-ratio:1/1;">
+          <div class="ic">📷</div><span>Загрузить</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Заметки мастера</label>
+      <textarea id="s_notes" placeholder="Что делали, состояние клиента, рекомендации..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-light" onclick="closeSessionForm()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveSession()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- TOAST + VIEWER                                                          -->
+<!-- ====================================================================== -->
+<div id="toast" class="toast"><span id="toastIcon">✓</span><span id="toastText">Готово</span></div>
+
+<div id="viewer" class="viewer-bg" onclick="this.classList.remove('active')">
+  <img id="viewerImg" src="" alt="">
+</div>
+
+<input type="file" id="hiddenFile" accept="image/*" capture="environment" style="display:none;">
+
+<!-- ====================================================================== -->
+<!-- SCRIPT                                                                  -->
+<!-- ====================================================================== -->
+<script>
+/* ============================================================
+   КОНФИГИ — заполнить перед заливкой на прод
+   ============================================================ */
+const SUPER_ADMIN = { login:'admin', password:'mmclients2026' };
+
+// Firebase config (mmclients project) — заполнить после регистрации Web App
+const FIREBASE_CONFIG = {
+  apiKey: 'PASTE_API_KEY',
+  authDomain: 'PASTE_AUTH_DOMAIN',
+  projectId: 'PASTE_PROJECT_ID',
+  storageBucket: 'PASTE_STORAGE_BUCKET',
+  messagingSenderId: 'PASTE_SENDER_ID',
+  appId: 'PASTE_APP_ID',
+};
+
+// Cloudinary unsigned upload — заполнить из dashboard.cloudinary.com
+const CLOUDINARY = {
+  cloudName: 'PASTE_CLOUD_NAME',
+  uploadPreset: 'PASTE_UPLOAD_PRESET', // создать unsigned preset в настройках
+};
+
+// Altegio (фаза 2) — заполнить когда получим токен
+const ALTEGIO = {
+  enabled: false,
+  partnerToken: '',
+  companyId: '',
+};
+
+/* ============================================================
+   КОНСТАНТЫ КОНТЕНТА
+   ============================================================ */
+const SOURCES = ['Инстаграм', '2ГИС', 'Посоветовали', 'Тик Ток', 'Сайт', 'Другое'];
+
+const ANAMNESIS_OPTIONS = [
+  'Препараты снижения веса',
+  'Гормональные препараты',
+  'Заболевания щитовидной железы',
+  'Сердечно-сосудистые заболевания',
+  'Сахарный диабет',
+  'Онкология (в т.ч. в анамнезе)',
+  'Варикоз / тромбофлебит',
+  'Кожные заболевания',
+  'Аллергические реакции',
+  'Беременность / лактация',
+  'Менструальный цикл',
+  'Хирургические вмешательства',
+  'Имплантаты / филлеры',
+  'Травмы позвоночника',
+  'Другое',
+];
+
+/* ============================================================
+   STATE & STORAGE
+   ============================================================ */
+const LS_KEY = 'mmClients_v1';
+let STATE = {
+  staff: [],          // {id, login, passwordHash, name, role, active}
+  clients: [],        // {id, ...поля анкеты, sessions:[]}
+  session: null,      // {login, name, role}
+  cloudReady: false,
+};
+
+function uid() { return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function fmtDate(s) { if(!s) return '—'; try { const d=new Date(s); return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'}); } catch(e){ return s; } }
+// quickHash — для дедупа cloud push (не для безопасности!)
+function quickHash(s) { let h=0; for(let i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return String(h); }
+// hashPass — SHA-256 для паролей
+async function hashPass(s) {
+  const buf = new TextEncoder().encode(s);
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+const SEED_FLAG = 'mmClients_seeded_v1';
+
+async function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw) {
+      const data = JSON.parse(raw);
+      STATE.staff = data.staff || [];
+      STATE.clients = data.clients || [];
+    }
+  } catch(e) { console.error('loadState fail', e); }
+  // seedDemo ТОЛЬКО если ни разу не сидили (защита от затирания прода после очистки кэша)
+  if(STATE.clients.length === 0 && STATE.staff.length === 0 && !localStorage.getItem(SEED_FLAG)) {
+    await seedDemo();
+    localStorage.setItem(SEED_FLAG, '1');
+  }
+  // восстановить сессию
+  try {
+    const s = sessionStorage.getItem('mmClients_session');
+    if(s) STATE.session = JSON.parse(s);
+  } catch(e){}
+}
+function saveState() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({staff:STATE.staff, clients:STATE.clients}));
+  } catch(e){ toast('Локальное хранилище переполнено','error'); }
+  cloudPushDebounced();
+}
+
+async function seedDemo() {
+  const annaId = uid(), leraId = uid();
+  STATE.staff = [
+    { id:annaId, login:'anna', passHash:await hashPass('1234'), name:'Анна Петрова', role:'master', active:true },
+    { id:leraId, login:'lera', passHash:await hashPass('1234'), name:'Лера Костина', role:'master', active:true },
+  ];
+  STATE.clients = [
+    {
+      id:uid(), date:'2026-04-15', specialist:'Анна Петрова', specialistId:annaId,
+      fio:'Иванова Мария Сергеевна', phone:'+7 707 123 4567',
+      age:'34', weight:'68', height:'166',
+      source:['Инстаграм','Посоветовали'],
+      complaints:'Целлюлит на бёдрах, отёчность ног к вечеру. Хочется подтянуть силуэт перед отпуском.',
+      anamnesis:['Гормональные препараты','Аллергические реакции'],
+      anamnesisOther:'Аллергия на эфирное масло цитрусовых.',
+      recommendations:'Курс антицеллюлитного массажа 10 сеансов 2 раза в неделю + обёртывания. Дома — контрастный душ, водный режим 2 л/день.',
+      initialPhotos:[],
+      altegioId:'', altegioLink:'',
+      sessions:[
+        { id:uid(), date:'2026-04-15', specialist:'Анна Петрова', specialistId:annaId, photoBefore:'', photoAfter:'', notes:'Первая консультация, замеры сделаны.' },
+      ],
+      createdAt:Date.now()-86400000*13, updatedAt:Date.now()-86400000*2,
+    },
+    {
+      id:uid(), date:'2026-04-22', specialist:'Лера Костина', specialistId:leraId,
+      fio:'Сулейменова Айгерим', phone:'+7 705 555 1122',
+      age:'41', weight:'74', height:'170',
+      source:['2ГИС'],
+      complaints:'Боли в шейно-воротниковой зоне, усталость после рабочего дня.',
+      anamnesis:['Травмы позвоночника'],
+      anamnesisOther:'',
+      recommendations:'Курс классического массажа спины 8 сеансов, рекомендована лимфодренажная процедура.',
+      initialPhotos:[],
+      altegioId:'', altegioLink:'',
+      sessions:[],
+      createdAt:Date.now()-86400000*6, updatedAt:Date.now()-86400000*1,
+    },
+  ];
+  saveState();
+}
+
+/* ============================================================
+   FIREBASE (опционально)
+   ============================================================ */
+let db = null;
+let cloudPushTimer = null;
+let cloudLastHash = '';
+let cloudInitialLoadDone = false;
+let cloudUnsubscribe = null;
+
+function cloudConfigured() {
+  return !FIREBASE_CONFIG.apiKey.startsWith('PASTE_');
+}
+function setCloudBadge(state) {
+  // state: 'off' | 'loading' | 'on'
+  const b = document.getElementById('cloudBadge');
+  const t = document.getElementById('cloudBadgeText');
+  b.classList.remove('on','off','loading');
+  if(state==='on') { b.classList.add('on'); t.textContent = 'Облако'; }
+  else if(state==='loading') { b.classList.add('off'); t.textContent = 'Подключаемся…'; }
+  else { b.classList.add('off'); t.textContent = 'Локально'; }
+}
+function initCloud() {
+  if(!cloudConfigured()) {
+    setCloudBadge('off');
+    document.getElementById('sysCloud').textContent = 'Не настроено';
+    cloudInitialLoadDone = true; // в локальном режиме блокировка не нужна
+    refreshLoginGate();
+    return;
+  }
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    setCloudBadge('loading');
+    document.getElementById('sysCloud').textContent = FIREBASE_CONFIG.projectId;
+    cloudLoad();
+  } catch(e) {
+    console.error('[cloud] init fail', e);
+    cloudInitialLoadDone = true;
+    refreshLoginGate();
+  }
+}
+function cloudLoad() {
+  if(!db) return;
+  db.collection('mmClients').doc('data').get().then(snap => {
+    if(!snap.exists) {
+      console.log('[cloud] empty doc — first time, push local seed');
+      cloudInitialLoadDone = true;
+      cloudPush(); // безопасно: документа нет, пушим что есть
+      cloudSubscribe();
+      setCloudBadge('on');
+      refreshLoginGate();
+      return;
+    }
+    const data = snap.data();
+    // Защита от затирания: если cloud пустой, но локально что-то есть — не затираем
+    if((!data.clients || data.clients.length===0) && (!data.staff || data.staff.length===0) && (STATE.clients.length>0 || STATE.staff.length>0)) {
+      cloudInitialLoadDone = true;
+      cloudPush();
+      cloudSubscribe();
+      setCloudBadge('on');
+      refreshLoginGate();
+      return;
+    }
+    // Применяем cloud-данные ПОВЕРХ локальных (cloud — источник правды)
+    if(data.staff) STATE.staff = data.staff;
+    if(data.clients) STATE.clients = data.clients;
+    cloudLastHash = quickHash(JSON.stringify({s:STATE.staff, c:STATE.clients}));
+    saveLocalOnly();
+    cloudInitialLoadDone = true;
+    cloudSubscribe();
+    setCloudBadge('on');
+    if(currentScreen==='dashScreen') renderClientList();
+    if(currentScreen==='adminScreen') renderAdmin();
+    refreshLoginGate();
+  }).catch(e => {
+    console.error('[cloud] load fail', e);
+    cloudInitialLoadDone = true;
+    refreshLoginGate();
+  });
+}
+function cloudSubscribe() {
+  if(!db || cloudUnsubscribe) return;
+  cloudUnsubscribe = db.collection('mmClients').doc('data').onSnapshot(snap => {
+    if(!snap.exists) return;
+    const data = snap.data();
+    // Не затираем своими пустыми данными
+    if((!data.clients || data.clients.length===0) && (!data.staff || data.staff.length===0) && (STATE.clients.length>0 || STATE.staff.length>0)) return;
+    if(data.staff) STATE.staff = data.staff;
+    if(data.clients) STATE.clients = data.clients;
+    cloudLastHash = quickHash(JSON.stringify({s:STATE.staff, c:STATE.clients}));
+    saveLocalOnly();
+    if(currentScreen==='dashScreen') renderClientList();
+    if(currentScreen==='adminScreen') renderAdmin();
+  });
+}
+function cloudPush() {
+  if(!db) return;
+  if(!cloudInitialLoadDone) { console.log('[cloud] skip push — initial load not done'); return; }
+  if(STATE.clients.length===0 && STATE.staff.length===0) { console.log('[cloud] skip push — empty state'); return; }
+  const payload = { staff:STATE.staff, clients:STATE.clients, ts:Date.now() };
+  const h = quickHash(JSON.stringify({s:payload.staff, c:payload.clients}));
+  if(h===cloudLastHash) return;
+  cloudLastHash = h;
+  db.collection('mmClients').doc('data').set(payload).catch(e => {
+    console.error('[cloud] push fail', e);
+    if(String(e.message||'').includes('exceeds')) toast('Документ слишком большой — настройте Cloudinary для фото','error');
+  });
+}
+function cloudPushDebounced() {
+  if(cloudPushTimer) clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(cloudPush, 800);
+}
+function saveLocalOnly() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({staff:STATE.staff, clients:STATE.clients})); } catch(e){}
+}
+
+/* ============================================================
+   CLOUDINARY (опционально)
+   ============================================================ */
+function cloudinaryConfigured() {
+  return !CLOUDINARY.cloudName.startsWith('PASTE_') && !CLOUDINARY.uploadPreset.startsWith('PASTE_');
+}
+async function uploadToCloudinary(file) {
+  if(!cloudinaryConfigured()) {
+    // base64-фолбэк только в локальном (без облака) демо-режиме.
+    // При cloud=on фото в base64 положит Firestore-документ за лимит 1 МБ — запрещаем.
+    if(cloudConfigured()) {
+      throw new Error('Сначала настройте Cloudinary — base64 в Firestore запрещён (лимит 1 МБ)');
+    }
+    const dataUrl = await fileToBase64(file);
+    return { url: dataUrl, publicId: '' };
+  }
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY.uploadPreset);
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`, { method:'POST', body:fd });
+  if(!r.ok) throw new Error('Cloudinary upload failed');
+  const json = await r.json();
+  return { url: json.secure_url, publicId: json.public_id || '' };
+}
+function fileToBase64(file) {
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+let activeRole = 'master';
+function setRole(r) {
+  activeRole = r;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active','admin-active'));
+  const btn = document.querySelector(`.role-btn[data-role="${r}"]`);
+  btn.classList.add('active');
+  if(r==='admin') btn.classList.add('admin-active');
+}
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+
+  if(!cloudInitialLoadDone) {
+    err.textContent = 'Подождите, подключаемся к облаку…';
+    err.style.display='block';
+    return;
+  }
+
+  if(activeRole==='admin') {
+    if(u===SUPER_ADMIN.login && p===SUPER_ADMIN.password) {
+      STATE.session = { login:u, name:'Суперадмин', role:'super', staffId:'__super__' };
+      sessionStorage.setItem('mmClients_session', JSON.stringify(STATE.session));
+      enterApp();
+      return;
+    }
+    err.textContent = 'Неверный логин или пароль';
+    err.style.display='block'; return;
+  }
+  // мастер
+  const ph = await hashPass(p);
+  const staff = STATE.staff.find(s => s.login===u && s.passHash===ph && s.active);
+  if(!staff) {
+    err.textContent = 'Неверный логин или пароль';
+    err.style.display='block'; return;
+  }
+  STATE.session = { login:staff.login, name:staff.name, role:'master', staffId:staff.id };
+  sessionStorage.setItem('mmClients_session', JSON.stringify(STATE.session));
+  enterApp();
+}
+
+// Дизейбл/энейбл кнопки логина пока облако грузится
+function refreshLoginGate() {
+  const btn = document.querySelector('.btn-enter');
+  const hint = document.querySelector('.login-box .hint');
+  if(!btn || !hint) return;
+  if(cloudInitialLoadDone) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'Войти';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.textContent = 'Подключаемся к облаку…';
+  }
+}
+function doLogout() {
+  STATE.session = null;
+  sessionStorage.removeItem('mmClients_session');
+  document.getElementById('topbar').style.display='none';
+  showScreen('loginScreen');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+function enterApp() {
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('userName').textContent = STATE.session.name;
+  document.getElementById('userRole').textContent = STATE.session.role==='super'?'суперадмин':'мастер';
+  document.getElementById('userAv').textContent = (STATE.session.name[0]||'?').toUpperCase();
+  document.getElementById('userAv').style.background = STATE.session.role==='super'?'var(--blue)':'var(--pink)';
+  document.getElementById('navAdmin').style.display = STATE.session.role==='super'?'inline-block':'none';
+  showScreen('dashScreen');
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+let currentScreen = 'loginScreen';
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===id));
+  currentScreen = id;
+  if(id==='dashScreen') renderClientList();
+  if(id==='adminScreen') renderAdmin();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   CLIENT LIST
+   ============================================================ */
+function refreshSpecialistFilter() {
+  const filterSel = document.getElementById('filterSpecialist');
+  if(!filterSel) return;
+  const cur = filterSel.value;
+  const specSet = new Set(STATE.clients.map(c => c.specialist).filter(Boolean));
+  const opts = '<option value="">Все специалисты</option>' + [...specSet].sort().map(s => `<option ${s===cur?'selected':''}>${escapeHtml(s)}</option>`).join('');
+  // не пересобираем DOM, если набор не изменился (сохраняет открытое состояние select)
+  if(filterSel.dataset.opts !== opts) { filterSel.innerHTML = opts; filterSel.dataset.opts = opts; }
+}
+
+function renderClientList() {
+  refreshSpecialistFilter();
+  const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
+  const fSpec = document.getElementById('filterSpecialist').value;
+  const sortBy = document.getElementById('sortBy').value;
+
+  // если мастер — видит только свои карточки (по staffId, со fallback на имя для старых записей)
+  let list = STATE.clients.slice();
+  const totalForSession = (STATE.session && STATE.session.role==='master')
+    ? list.filter(c => c.specialistId
+        ? c.specialistId===STATE.session.staffId
+        : (c.specialist||'').toLowerCase().trim()===STATE.session.name.toLowerCase().trim()).length
+    : list.length;
+  if(STATE.session && STATE.session.role==='master') {
+    list = list.filter(c => c.specialistId
+      ? c.specialistId===STATE.session.staffId
+      : (c.specialist||'').toLowerCase().trim()===STATE.session.name.toLowerCase().trim());
+  }
+  const beforeSearch = list.length;
+  if(q) list = list.filter(c => (c.fio+' '+(c.phone||'')+' '+(c.complaints||'')).toLowerCase().includes(q));
+  if(fSpec) list = list.filter(c => c.specialist===fSpec);
+  if(sortBy==='created') list.sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+  else if(sortBy==='name') list.sort((a,b) => (a.fio||'').localeCompare(b.fio||'','ru'));
+  else list.sort((a,b) => (b.updatedAt||0)-(a.updatedAt||0));
+
+  const wrap = document.getElementById('clientList');
+  const empty = document.getElementById('clientEmpty');
+  document.getElementById('dashSub').textContent = `Всего карточек: ${list.length}${list.length!==totalForSession?` из ${totalForSession}`:''}`;
+
+  if(list.length===0) {
+    wrap.innerHTML='';
+    if(totalForSession===0) {
+      empty.innerHTML = `<div class="ic">📋</div><h3>Карточек ещё нет</h3><p>Нажмите «+ Новый клиент», чтобы завести первую карточку</p>`;
+    } else {
+      empty.innerHTML = `<div class="ic">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте другой запрос или сбросьте фильтры</p>`;
+    }
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  wrap.innerHTML = list.map(c => {
+    const sessions = c.sessions||[];
+    const lastSes = sessions[sessions.length-1];
+    return `
+      <div class="client-card" data-id="${escapeHtml(c.id)}" onclick="openClientCard(this.dataset.id)">
+        ${c.specialist?`<div class="specialist">${escapeHtml(c.specialist)}</div>`:''}
+        <div class="name">${escapeHtml(c.fio||'—')}</div>
+        <div class="meta">${c.age?escapeHtml(c.age)+' лет':''}${c.weight?' · '+escapeHtml(c.weight)+' кг':''}${c.height?' · '+escapeHtml(c.height)+' см':''}</div>
+        <div style="font-size:13px; color:#555; margin-bottom:10px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(c.complaints||'—')}</div>
+        <div class="stats">
+          <span>📷 <b>${sessions.length}</b> сесс.</span>
+          <span>📅 ${lastSes?fmtDate(lastSes.date):fmtDate(c.date)}</span>
+          ${c.altegioId?'<span style="color:var(--blue);">🔗 Altegio</span>':''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   CLIENT FORM
+   ============================================================ */
+let editingClientId = null;
+
+let editingInitialPhotos = []; // [{url, caption}]
+
+function openClientForm(id) {
+  editingClientId = id || null;
+  editingInitialPhotos = [];
+  document.getElementById('formTitle').textContent = id?'Редактирование карточки':'Новая карточка клиента';
+  document.getElementById('btnDelete').style.display = id?'inline-block':'none';
+
+  // отрендерить чекбоксы
+  document.getElementById('sourceGrid').innerHTML = SOURCES.map(s => `
+    <label class="check-pill" data-val="${escapeHtml(s)}" data-group="source">
+      <input type="checkbox" value="${escapeHtml(s)}"> ${escapeHtml(s)}
+    </label>`).join('');
+  document.getElementById('anamnesisGrid').innerHTML = ANAMNESIS_OPTIONS.map(s => `
+    <label class="check-pill" data-val="${escapeHtml(s)}" data-group="anamnesis">
+      <input type="checkbox" value="${escapeHtml(s)}"> ${escapeHtml(s)}
+    </label>`).join('');
+  document.querySelectorAll('.check-pill input').forEach(inp => {
+    inp.addEventListener('change', e => e.target.closest('.check-pill').classList.toggle('checked', e.target.checked));
+  });
+
+  if(id) {
+    const c = STATE.clients.find(x => x.id===id);
+    if(c) {
+      document.getElementById('f_date').value = c.date||todayStr();
+      document.getElementById('f_specialist').value = c.specialist||'';
+      document.getElementById('f_fio').value = c.fio||'';
+      document.getElementById('f_phone').value = c.phone||'';
+      document.getElementById('f_age').value = c.age||'';
+      document.getElementById('f_weight').value = c.weight||'';
+      document.getElementById('f_height').value = c.height||'';
+      document.getElementById('f_complaints').value = c.complaints||'';
+      document.getElementById('f_anamnesisOther').value = c.anamnesisOther||'';
+      document.getElementById('f_recommendations').value = c.recommendations||'';
+      (c.source||[]).forEach(v => {
+        const inp = document.querySelector(`[data-group="source"] input[value="${cssEsc(v)}"]`);
+        if(inp){ inp.checked=true; inp.closest('.check-pill').classList.add('checked'); }
+      });
+      (c.anamnesis||[]).forEach(v => {
+        const inp = document.querySelector(`[data-group="anamnesis"] input[value="${cssEsc(v)}"]`);
+        if(inp){ inp.checked=true; inp.closest('.check-pill').classList.add('checked'); }
+      });
+      editingInitialPhotos = (c.initialPhotos||[]).map(p => ({...p}));
+    }
+  } else {
+    document.getElementById('f_date').value = todayStr();
+    document.getElementById('f_specialist').value = STATE.session?.role==='master'?STATE.session.name:'';
+    if(STATE.session?.role==='master') document.getElementById('f_specialist').dataset.staffId = STATE.session.staffId;
+    ['f_fio','f_phone','f_age','f_weight','f_height','f_complaints','f_anamnesisOther','f_recommendations'].forEach(k => document.getElementById(k).value='');
+  }
+  renderInitialPhotos();
+  showScreen('clientFormScreen');
+}
+
+function renderInitialPhotos() {
+  const wrap = document.getElementById('initialPhotoGrid');
+  if(!wrap) return;
+  if(editingInitialPhotos.length===0) { wrap.innerHTML = '<p style="color:#aaa; font-size:13px; grid-column:1/-1;">Фото пока не добавлены</p>'; return; }
+  wrap.innerHTML = editingInitialPhotos.map((p,i) => `
+    <div class="photo-tile" data-idx="${i}">
+      <img src="${escapeHtml(p.url)}" data-action="zoom" alt="">
+      <button class="photo-del" data-action="del" title="Удалить">×</button>
+      <input class="caption-input" type="text" value="${escapeHtml(p.caption||'')}" placeholder="Подпись (зона, ракурс)" data-action="caption">
+    </div>
+  `).join('');
+}
+// делегирование событий: убирает XSS через интерполяцию URL/индекса в onclick
+document.addEventListener('click', e => {
+  const tile = e.target.closest('#initialPhotoGrid .photo-tile');
+  if(!tile) return;
+  const idx = +tile.dataset.idx;
+  const action = e.target.dataset.action;
+  if(action==='zoom') viewPhoto(editingInitialPhotos[idx]?.url);
+  else if(action==='del') { editingInitialPhotos.splice(idx,1); renderInitialPhotos(); }
+});
+document.addEventListener('input', e => {
+  if(!e.target.matches('#initialPhotoGrid .caption-input')) return;
+  const tile = e.target.closest('.photo-tile');
+  const idx = +tile.dataset.idx;
+  if(editingInitialPhotos[idx]) editingInitialPhotos[idx].caption = e.target.value;
+});
+
+let initialPhotoUploadInput = null;
+function addInitialPhoto() {
+  if(!initialPhotoUploadInput) {
+    initialPhotoUploadInput = document.createElement('input');
+    initialPhotoUploadInput.type='file'; initialPhotoUploadInput.accept='image/*'; initialPhotoUploadInput.multiple=true;
+    initialPhotoUploadInput.addEventListener('change', async e => {
+      const files = [...e.target.files];
+      if(!files.length) return;
+      toast('Загружаю фото…');
+      let okCount = 0, lastErr = null;
+      for(const f of files) {
+        try {
+          const r = await uploadToCloudinary(f);
+          editingInitialPhotos.push({ url:r.url, publicId:r.publicId, caption:'' });
+          renderInitialPhotos();
+          okCount++;
+        } catch(err) { console.error(err); lastErr = err; }
+      }
+      if(okCount>0) toast(`Загружено: ${okCount} фото`,'success');
+      if(lastErr) toast(lastErr.message||'Не удалось загрузить','error');
+      e.target.value = '';
+    });
+  }
+  initialPhotoUploadInput.click();
+}
+
+function getChecked(group) {
+  return [...document.querySelectorAll(`[data-group="${group}"] input:checked`)].map(i => i.value);
+}
+
+function saveClient() {
+  const fio = document.getElementById('f_fio').value.trim();
+  const age = document.getElementById('f_age').value.trim();
+  if(!fio || !age) { toast('Заполните ФИО и возраст','error'); return; }
+
+  const specName = document.getElementById('f_specialist').value.trim();
+  // ищем staffId по имени, либо берём из сессии (мастер сам у себя)
+  let specId = STATE.staff.find(s => s.name.toLowerCase()===specName.toLowerCase())?.id || '';
+  if(!specId && STATE.session?.role==='master' && specName.toLowerCase()===STATE.session.name.toLowerCase()) specId = STATE.session.staffId;
+
+  const data = {
+    date: document.getElementById('f_date').value,
+    specialist: specName, specialistId: specId,
+    fio, phone: document.getElementById('f_phone').value.trim(),
+    age, weight: document.getElementById('f_weight').value.trim(),
+    height: document.getElementById('f_height').value.trim(),
+    source: getChecked('source'),
+    complaints: document.getElementById('f_complaints').value.trim(),
+    anamnesis: getChecked('anamnesis'),
+    anamnesisOther: document.getElementById('f_anamnesisOther').value.trim(),
+    recommendations: document.getElementById('f_recommendations').value.trim(),
+    initialPhotos: editingInitialPhotos.map(p => ({url:p.url, publicId:p.publicId||'', caption:(p.caption||'').trim()})),
+    updatedAt: Date.now(),
+  };
+
+  if(editingClientId) {
+    const i = STATE.clients.findIndex(c => c.id===editingClientId);
+    if(i>=0) STATE.clients[i] = { ...STATE.clients[i], ...data };
+    toast('Карточка обновлена');
+  } else {
+    const c = { id:uid(), ...data, sessions:[], altegioId:'', altegioLink:'', createdAt:Date.now() };
+    STATE.clients.unshift(c);
+    editingClientId = c.id;
+    toast('Карточка создана');
+  }
+  saveState();
+  openClientCard(editingClientId);
+}
+
+function deleteClient() {
+  if(!editingClientId) return;
+  if(!confirm('Удалить карточку безвозвратно?')) return;
+  STATE.clients = STATE.clients.filter(c => c.id!==editingClientId);
+  editingClientId = null;
+  saveState();
+  toast('Карточка удалена');
+  showScreen('dashScreen');
+}
+
+/* ============================================================
+   CLIENT CARD
+   ============================================================ */
+let viewingClientId = null;
+function openClientCard(id) {
+  viewingClientId = id;
+  const c = STATE.clients.find(x => x.id===id);
+  if(!c) { showScreen('dashScreen'); return; }
+  document.getElementById('cardName').textContent = c.fio;
+  document.getElementById('cardSub').textContent = `${c.age||'—'} лет · ${c.weight||'—'} кг · ${c.height||'—'} см · ${c.specialist||'—'}`;
+
+  const rows = [
+    ['Дата консультации', fmtDate(c.date)],
+    ['Специалист', c.specialist||'—'],
+    ['Телефон', c.phone||'—'],
+    ['Источник', c.source && c.source.length ? c.source.map(s=>`<span class="tag blue">${escapeHtml(s)}</span>`).join(' ') : '—'],
+    ['Жалобы и пожелания', c.complaints||'—'],
+    ['Анамнез', c.anamnesis && c.anamnesis.length ? c.anamnesis.map(s=>`<span class="tag pink">${escapeHtml(s)}</span>`).join(' ') : '—'],
+    ['Другое', c.anamnesisOther||'—'],
+    ['Рекомендации', c.recommendations||'—'],
+  ];
+  const initPhotos = c.initialPhotos||[];
+  const photoBlock = initPhotos.length
+    ? `<div style="margin-top:18px; padding-top:18px; border-top:1.5px solid var(--gray);">
+         <div style="font-weight:700; font-size:13px; margin-bottom:10px; color:#444;">📷 Фото на момент консультации (${initPhotos.length})</div>
+         <div class="photo-gallery" id="cardInitialPhotos">${initPhotos.map((p,i) => `
+           <div class="photo-readonly" data-idx="${i}">
+             <img src="${escapeHtml(p.url)}" alt="">
+             ${p.caption?`<div class="cap">${escapeHtml(p.caption)}</div>`:''}
+           </div>`).join('')}</div>
+       </div>`
+    : '';
+  document.getElementById('cardInfoBlock').innerHTML = rows.map(r => `
+    <div class="info-row"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>
+  `).join('') + photoBlock;
+
+  // sessions
+  const sl = document.getElementById('sessionList');
+  const se = document.getElementById('sessionEmpty');
+  const sessions = (c.sessions||[]).slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  if(sessions.length===0) { sl.innerHTML=''; se.style.display='block'; }
+  else {
+    se.style.display='none';
+    sl.innerHTML = sessions.map((s,i) => `
+      <div class="session-item" data-sid="${escapeHtml(s.id)}">
+        <div class="session-head">
+          <div>
+            <div class="session-date">Сессия #${i+1} · ${fmtDate(s.date)}</div>
+            <div style="font-size:12px; color:#888; margin-top:2px;">${escapeHtml(s.specialist||'—')}</div>
+          </div>
+          <button class="btn-ghost" style="padding:6px 12px; font-size:12px;" data-action="del-session">Удалить</button>
+        </div>
+        <div class="session-photos">
+          ${s.photoBefore
+            ? `<div class="photo-cell" data-photo="before"><span class="label">До</span><img src="${escapeHtml(s.photoBefore)}" alt=""></div>`
+            : `<div class="photo-cell empty"><div class="ic">📷</div><span>Фото ДО</span></div>`}
+          ${s.photoAfter
+            ? `<div class="photo-cell" data-photo="after"><span class="label">После</span><img src="${escapeHtml(s.photoAfter)}" alt=""></div>`
+            : `<div class="photo-cell empty"><div class="ic">📷</div><span>Фото ПОСЛЕ</span></div>`}
+        </div>
+        ${s.notes?`<div class="session-notes">${escapeHtml(s.notes)}</div>`:''}
+      </div>
+    `).join('');
+  }
+
+  // altegio
+  document.getElementById('altegioId').textContent = c.altegioId||'—';
+  const link = c.altegioLink||'';
+  document.getElementById('altegioLink').innerHTML = link
+    ? `<a href="${escapeHtml(link)}" target="_blank" style="color:var(--blue);">Открыть ↗</a>`
+    : '—';
+  document.getElementById('btnAltegio').style.display = link?'inline-flex':'none';
+
+  showScreen('clientCardScreen');
+}
+
+function editCurrentClient() { if(viewingClientId) openClientForm(viewingClientId); }
+
+function copyShareLink() {
+  if(!viewingClientId) return;
+  const url = `${location.origin}${location.pathname}?id=${viewingClientId}`;
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Ссылка скопирована'); } catch(e){ prompt('Скопируйте ссылку:', url); }
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => toast('Ссылка скопирована — вставьте её в Altegio'))
+      .catch(fallback);
+  } else fallback();
+}
+function setAltegioLink() {
+  if(!viewingClientId) return;
+  const c = STATE.clients.find(x=>x.id===viewingClientId);
+  if(!c) return;
+  const link = prompt('Ссылка на карточку клиента в Altegio:', c.altegioLink||'');
+  if(link===null) return;
+  c.altegioLink = link.trim();
+  // попробовать вытащить ID из ссылки
+  const m = link.match(/clients?\/(\d+)/);
+  if(m) c.altegioId = m[1];
+  c.updatedAt = Date.now();
+  saveState();
+  openClientCard(viewingClientId);
+  toast('Связь с Altegio сохранена');
+}
+function openAltegio() {
+  const c = STATE.clients.find(x=>x.id===viewingClientId);
+  if(c?.altegioLink) window.open(c.altegioLink,'_blank');
+}
+
+/* ============================================================
+   SESSIONS (фото до/после)
+   ============================================================ */
+let editingSession = null;
+let pendingPhotoSlot = null; // 'before' | 'after'
+
+function openSessionForm() {
+  if(!viewingClientId) return;
+  editingSession = { id:uid(), date:todayStr(), specialist:STATE.session?.name||'', specialistId:STATE.session?.staffId||'', photoBefore:'', photoBeforeId:'', photoAfter:'', photoAfterId:'', notes:'' };
+  document.getElementById('s_date').value = editingSession.date;
+  document.getElementById('s_specialist').value = editingSession.specialist;
+  document.getElementById('s_notes').value = '';
+  renderSessionPhotoCells();
+  document.getElementById('sessionModal').classList.add('active');
+}
+function closeSessionForm() {
+  document.getElementById('sessionModal').classList.remove('active');
+  editingSession = null;
+}
+function renderSessionPhotoCells() {
+  const before = document.getElementById('photoBeforeCell');
+  const after = document.getElementById('photoAfterCell');
+  if(editingSession.photoBefore) {
+    before.classList.remove('empty');
+    before.innerHTML = `<span class="label">До</span><img src="${editingSession.photoBefore}" alt="">`;
+  } else {
+    before.classList.add('empty');
+    before.innerHTML = `<div class="ic">📷</div><span>Загрузить</span>`;
+  }
+  if(editingSession.photoAfter) {
+    after.classList.remove('empty');
+    after.innerHTML = `<span class="label">После</span><img src="${editingSession.photoAfter}" alt="">`;
+  } else {
+    after.classList.add('empty');
+    after.innerHTML = `<div class="ic">📷</div><span>Загрузить</span>`;
+  }
+}
+function uploadPhoto(slot) {
+  pendingPhotoSlot = slot;
+  document.getElementById('hiddenFile').click();
+}
+document.getElementById('hiddenFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if(!file || !pendingPhotoSlot) return;
+  toast('Загружаю фото…');
+  try {
+    const r = await uploadToCloudinary(file);
+    if(pendingPhotoSlot==='before') { editingSession.photoBefore = r.url; editingSession.photoBeforeId = r.publicId; }
+    else { editingSession.photoAfter = r.url; editingSession.photoAfterId = r.publicId; }
+    renderSessionPhotoCells();
+    toast('Фото загружено','success');
+  } catch(err) {
+    console.error(err);
+    toast(err.message||'Ошибка загрузки фото','error');
+  }
+  pendingPhotoSlot = null;
+  e.target.value = '';
+});
+
+function saveSession() {
+  if(!viewingClientId || !editingSession) return;
+  editingSession.date = document.getElementById('s_date').value;
+  editingSession.specialist = document.getElementById('s_specialist').value.trim();
+  editingSession.notes = document.getElementById('s_notes').value.trim();
+  const c = STATE.clients.find(x => x.id===viewingClientId);
+  if(!c) return;
+  c.sessions = c.sessions || [];
+  c.sessions.push(editingSession);
+  c.updatedAt = Date.now();
+  saveState();
+  closeSessionForm();
+  openClientCard(viewingClientId);
+  toast('Сессия добавлена');
+}
+function deleteSession(sid) {
+  if(!viewingClientId) return;
+  if(!confirm('Удалить сессию?')) return;
+  const c = STATE.clients.find(x => x.id===viewingClientId);
+  c.sessions = (c.sessions||[]).filter(s => s.id!==sid);
+  c.updatedAt = Date.now();
+  saveState();
+  openClientCard(viewingClientId);
+}
+
+// Делегирование для карточки клиента: просмотр фото и удаление сессий
+document.addEventListener('click', e => {
+  // initial photos zoom
+  const initTile = e.target.closest('#cardInitialPhotos .photo-readonly');
+  if(initTile && viewingClientId) {
+    const idx = +initTile.dataset.idx;
+    const c = STATE.clients.find(x => x.id===viewingClientId);
+    const url = c?.initialPhotos?.[idx]?.url;
+    if(url) viewPhoto(url);
+    return;
+  }
+  // session photo zoom
+  const photoCell = e.target.closest('.session-photos .photo-cell:not(.empty)');
+  if(photoCell && viewingClientId) {
+    const sItem = photoCell.closest('.session-item');
+    const sid = sItem?.dataset.sid;
+    const which = photoCell.dataset.photo;
+    const c = STATE.clients.find(x => x.id===viewingClientId);
+    const ses = c?.sessions?.find(s => s.id===sid);
+    const url = which==='before' ? ses?.photoBefore : ses?.photoAfter;
+    if(url) viewPhoto(url);
+    return;
+  }
+  // delete session
+  const delBtn = e.target.closest('[data-action="del-session"]');
+  if(delBtn) {
+    const sItem = delBtn.closest('.session-item');
+    const sid = sItem?.dataset.sid;
+    if(sid) deleteSession(sid);
+  }
+});
+function viewPhoto(url) {
+  document.getElementById('viewerImg').src = url;
+  document.getElementById('viewer').classList.add('active');
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function renderAdmin() {
+  if(STATE.session?.role!=='super') { showScreen('dashScreen'); return; }
+  const list = document.getElementById('masterList');
+  const empty = document.getElementById('masterEmpty');
+  if(STATE.staff.length===0) { list.innerHTML=''; empty.style.display='block'; }
+  else {
+    empty.style.display='none';
+    list.innerHTML = STATE.staff.map(s => `
+      <div class="master-row">
+        <div class="info">
+          <div class="av ${s.active?'':'pink'}">${(s.name[0]||'?').toUpperCase()}</div>
+          <div>
+            <div class="nm">${escapeHtml(s.name)}</div>
+            <div class="meta">@${escapeHtml(s.login)} · ${s.active?'активен':'отключён'}</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn-ghost" onclick="toggleMaster('${s.id}')">${s.active?'Отключить':'Включить'}</button>
+          <button class="btn-ghost" onclick="editMaster('${s.id}')">✎</button>
+          <button class="btn-ghost" style="color:var(--pink);" onclick="deleteMaster('${s.id}')">×</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('sysClientsCount').textContent = STATE.clients.length;
+  document.getElementById('sysSessionsCount').textContent = STATE.clients.reduce((a,c)=>a+(c.sessions?.length||0),0);
+  document.getElementById('sysCloudinary').textContent = cloudinaryConfigured()?CLOUDINARY.cloudName:'Не настроено';
+}
+
+let editingMasterId = null;
+function openMasterForm() {
+  editingMasterId = null;
+  document.getElementById('masterModalTitle').textContent='Добавить мастера';
+  ['m_name','m_login','m_pass'].forEach(k => document.getElementById(k).value='');
+  document.getElementById('masterModal').classList.add('active');
+}
+function editMaster(id) {
+  const m = STATE.staff.find(s => s.id===id);
+  if(!m) return;
+  editingMasterId = id;
+  document.getElementById('masterModalTitle').textContent='Редактировать мастера';
+  document.getElementById('m_name').value = m.name;
+  document.getElementById('m_login').value = m.login;
+  document.getElementById('m_pass').value = '';
+  document.getElementById('masterModal').classList.add('active');
+}
+function closeMasterForm() { document.getElementById('masterModal').classList.remove('active'); }
+async function saveMaster() {
+  const name = document.getElementById('m_name').value.trim();
+  const login = document.getElementById('m_login').value.trim().toLowerCase();
+  const pass = document.getElementById('m_pass').value;
+  if(!name || !login) { toast('Заполните имя и логин','error'); return; }
+  if(!editingMasterId && pass.length<4) { toast('Пароль не короче 4 символов','error'); return; }
+  const dup = STATE.staff.find(s => s.login===login && s.id!==editingMasterId);
+  if(dup) { toast('Логин уже занят','error'); return; }
+  if(editingMasterId) {
+    const m = STATE.staff.find(s => s.id===editingMasterId);
+    const oldName = m.name;
+    m.name = name; m.login = login;
+    if(pass) m.passHash = await hashPass(pass);
+    // Если имя поменялось — обновим строку specialist в существующих карточках, привязанных по id
+    if(oldName !== name) {
+      STATE.clients.forEach(c => { if(c.specialistId===m.id) c.specialist = name; });
+    }
+  } else {
+    STATE.staff.push({ id:uid(), name, login, passHash:await hashPass(pass), role:'master', active:true });
+  }
+  saveState();
+  closeMasterForm();
+  renderAdmin();
+  toast('Сохранено');
+}
+function toggleMaster(id) {
+  const m = STATE.staff.find(s => s.id===id);
+  if(!m) return;
+  m.active = !m.active; saveState(); renderAdmin();
+}
+function deleteMaster(id) {
+  if(!confirm('Удалить мастера? Его карточки клиентов останутся.')) return;
+  STATE.staff = STATE.staff.filter(s => s.id!==id);
+  saveState(); renderAdmin();
+}
+
+/* ============================================================
+   IMPORT/EXPORT/RESET
+   ============================================================ */
+function exportClients() {
+  const data = JSON.stringify({ staff:STATE.staff, clients:STATE.clients, exportedAt:new Date().toISOString() }, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mm-clients-${todayStr()}.json`;
+  a.click();
+  toast('Экспорт сохранён');
+}
+function importClients() {
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='application/json';
+  inp.onchange = async e => {
+    const f = e.target.files[0];
+    const text = await f.text();
+    try {
+      const d = JSON.parse(text);
+      const incomingClients = (d.clients||[]).length;
+      const incomingStaff = (d.staff||[]).length;
+      const choice = confirm(
+        `Импорт: ${incomingStaff} мастеров, ${incomingClients} клиентов.\n\n` +
+        `OK — заменить ВСЕ текущие данные (${STATE.staff.length} мастеров, ${STATE.clients.length} клиентов).\n` +
+        `Отмена — НЕ импортировать.`
+      );
+      if(!choice) { toast('Импорт отменён'); return; }
+      if(d.staff) STATE.staff = d.staff;
+      if(d.clients) STATE.clients = d.clients;
+      saveState(); renderAdmin();
+      if(currentScreen==='dashScreen') renderClientList();
+      toast('Импорт завершён');
+    } catch(err) { toast('Файл не распознан','error'); }
+  };
+  inp.click();
+}
+function resetAll() {
+  if(!confirm('Удалить ВСЕ данные локально и пересоздать демо?')) return;
+  localStorage.removeItem(LS_KEY);
+  STATE.staff=[]; STATE.clients=[];
+  seedDemo();
+  renderAdmin();
+  toast('Сброшено');
+}
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function escapeHtml(s) {
+  if(s===null || s===undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function cssEsc(s) { return String(s).replace(/"/g,'\\"'); }
+
+let toastTimer = null;
+function toast(text, kind) {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + (kind||'success');
+  document.getElementById('toastIcon').textContent = kind==='error'?'⚠':'✓';
+  document.getElementById('toastText').textContent = text;
+  t.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+(async () => {
+  await loadState();
+  initCloud();
+  refreshLoginGate();
+
+  // deeplink ?id=...
+  const urlId = new URLSearchParams(location.search).get('id');
+
+  if(STATE.session) {
+    enterApp();
+    if(urlId && STATE.clients.find(c => c.id===urlId)) openClientCard(urlId);
+  } else {
+    showScreen('loginScreen');
+  }
+})();
+
+// Enter в логине
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
