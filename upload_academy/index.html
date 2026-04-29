@@ -389,10 +389,6 @@ body {
   font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 800;
   color: var(--black); line-height: 1.25;
 }
-.cat-card-salary {
-  font-family: 'Unbounded', sans-serif; font-size: 15px; font-weight: 800;
-  color: var(--cat-color, var(--yellow));
-}
 .cat-card-progress-bar {
   height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden;
   margin-top: auto;
@@ -581,10 +577,6 @@ body {
 .career-card-title {
   font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700; color:var(--black);
 }
-.career-salary {
-  font-family:'Unbounded',sans-serif; font-size:14px; font-weight:700; padding:4px 14px;
-  border-radius:var(--radius-pill); white-space:nowrap;
-}
 .career-card-desc { font-size:13px; color:#666; margin-bottom:10px; line-height:1.4; }
 .career-procs {
   display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;
@@ -634,10 +626,6 @@ body {
   font-family:'Unbounded',sans-serif; font-size:22px; font-weight:800; margin-bottom:8px;
 }
 .cat-reward-sub { font-size:15px; color:#666; margin-bottom:8px; }
-.cat-reward-salary {
-  font-family:'Unbounded',sans-serif; font-size:28px; font-weight:800;
-  margin:16px 0; padding:12px 24px; border-radius:var(--radius); display:inline-block;
-}
 .cat-reward-btn {
   margin-top:20px; padding:14px 40px; border-radius:var(--radius-pill);
   background:var(--black); color:#fff; font-family:'Unbounded',sans-serif;
@@ -2542,7 +2530,6 @@ body {
   .categories-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .cat-card { padding: 14px 14px; }
   .cat-card-name { font-size: 12px; }
-  .cat-card-salary { font-size: 13px; }
   .cat-detail-header { padding: 24px 20px 22px; }
   .cat-detail-title { font-size: 20px; }
   .cat-detail-sub { font-size: 13px; }
@@ -2576,14 +2563,12 @@ body {
   .career-node { width:38px; height:38px; font-size:18px; }
   .career-card { padding:14px 16px; }
   .career-card-title { font-size:13px; }
-  .career-salary { font-size:12px; padding:3px 10px; }
   .career-card-desc { font-size:12px; }
   .career-procs { gap:4px; }
   .career-proc-tag { font-size:10px; padding:2px 8px; }
   .cat-reward-card { padding:28px 24px; }
   .cat-reward-icon { font-size:48px; }
   .cat-reward-title { font-size:18px; }
-  .cat-reward-salary { font-size:22px; }
 
   /* Days grid */
   .days-section { padding:0 16px; }
@@ -2824,7 +2809,7 @@ body {
           <div class="ob-phase-num">3</div>
           <div class="ob-phase-icon">&#128200;</div>
           <div class="ob-phase-title">Карьерный путь</div>
-          <div class="ob-phase-desc">Обучение по 5 категориям с ростом зарплаты.</div>
+          <div class="ob-phase-desc">Обучение по 5 категориям с ростом мастерства.</div>
           <div class="ob-phase-action">&#127919; К категориям</div>
         </div>
       </div>
@@ -3027,7 +3012,6 @@ body {
             <div style="font-size:12px;color:#999;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Текущая категория</div>
             <div style="font-family:'Unbounded',sans-serif;font-size:18px;font-weight:800;" id="profileCatName">Категория 1 — Новичок</div>
           </div>
-          <div style="font-family:'Unbounded',sans-serif;font-size:16px;font-weight:800;padding:6px 16px;border-radius:var(--radius-pill);" id="profileCatSalary">200 000 ₸</div>
         </div>
         <div style="height:8px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden;">
           <div style="height:100%;border-radius:4px;transition:width 0.5s;" id="profileCatProgress"></div>
@@ -3353,17 +3337,17 @@ body {
       <button class="welcome-btn" onclick="nextWelcomeStep()">Далее &#8594;</button>
     </div>
 
-    <!-- Step 2: Career & salary -->
+    <!-- Step 2: Career path -->
     <div class="welcome-step" id="wStep2">
       <div class="welcome-icon">&#128200;</div>
       <h2>Ваш карьерный путь</h2>
-      <p style="font-size:14px;">5 категорий с ростом зарплаты. Каждая открывается после прохождения обучения.</p>
+      <p style="font-size:14px;">5 категорий мастерства. Каждая открывается после прохождения обучения предыдущей.</p>
       <div class="welcome-info" style="text-align:left;">
-        <div class="wi-item" style="background:rgba(76,175,80,0.08);"><span>&#127793;</span> <strong>Кат. 1 &mdash; Новичок:</strong> 200 000 &#8376;</div>
-        <div class="wi-item" style="background:rgba(33,150,243,0.08);"><span>&#11088;</span> <strong>Кат. 2 &mdash; Вакуумный специалист:</strong> 300 000 &#8376;</div>
-        <div class="wi-item" style="background:rgba(255,152,0,0.08);"><span>&#128293;</span> <strong>Кат. 3 &mdash; Эксперт методик:</strong> 350 000 &#8376;</div>
-        <div class="wi-item" style="background:rgba(233,30,99,0.08);"><span>&#128142;</span> <strong>Кат. 4 &mdash; Ручные методики:</strong> 400 000 &#8376;</div>
-        <div class="wi-item" style="background:rgba(156,39,176,0.08);"><span>&#127942;</span> <strong>Кат. 5 &mdash; Ведущий технолог:</strong> 450 000 &#8376;</div>
+        <div class="wi-item" style="background:rgba(76,175,80,0.08);"><span>&#127793;</span> <strong>Кат. 1 &mdash; Новичок</strong></div>
+        <div class="wi-item" style="background:rgba(33,150,243,0.08);"><span>&#11088;</span> <strong>Кат. 2 &mdash; Вакуумный специалист</strong></div>
+        <div class="wi-item" style="background:rgba(255,152,0,0.08);"><span>&#128293;</span> <strong>Кат. 3 &mdash; Эксперт методик</strong></div>
+        <div class="wi-item" style="background:rgba(233,30,99,0.08);"><span>&#128142;</span> <strong>Кат. 4 &mdash; Ручные методики</strong></div>
+        <div class="wi-item" style="background:rgba(156,39,176,0.08);"><span>&#127942;</span> <strong>Кат. 5 &mdash; Ведущий технолог</strong></div>
       </div>
       <button class="welcome-btn" onclick="nextWelcomeStep()">Далее &#8594;</button>
     </div>
@@ -3390,7 +3374,7 @@ body {
       <div class="welcome-goals">
         <div class="wg-item"><span>1&#65039;&#8419;</span> Изучите <strong>"О компании"</strong> &mdash; история и ценности</div>
         <div class="wg-item"><span>2&#65039;&#8419;</span> Пройдите <strong>Стандарты и сервис</strong> &mdash; 6 уроков</div>
-        <div class="wg-item"><span>3&#65039;&#8419;</span> Двигайтесь по <strong>категориям</strong> &mdash; растите в зарплате</div>
+        <div class="wg-item"><span>3&#65039;&#8419;</span> Двигайтесь по <strong>категориям</strong> &mdash; развивайте мастерство</div>
       </div>
       <button class="welcome-btn green" onclick="closeWelcomeAndOpenCompany()">&#127970; Начать с идеологии</button>
     </div>
@@ -3450,10 +3434,6 @@ body {
       <div class="cat-detail-title" id="catDetailTitle">Новичок</div>
       <div class="cat-detail-sub" id="catDetailSub">Стажировка, адаптация</div>
       <div class="cat-detail-meta">
-        <div class="cat-detail-meta-item">
-          <div class="cat-detail-meta-lbl">Зарплата</div>
-          <div class="cat-detail-meta-val" id="catDetailSalary">200 000 &#8376;</div>
-        </div>
         <div class="cat-detail-meta-item">
           <div class="cat-detail-meta-lbl">Уроков</div>
           <div class="cat-detail-meta-val" id="catDetailCount">40</div>
@@ -3581,8 +3561,6 @@ body {
     <div class="cat-reward-icon" id="catRewardIcon">&#127942;</div>
     <div class="cat-reward-title" id="catRewardTitle">Категория пройдена!</div>
     <div class="cat-reward-sub" id="catRewardSub">Вы разблокировали новый уровень</div>
-    <div class="cat-reward-salary" id="catRewardSalary" style="background:rgba(0,230,118,0.15);color:#00a854;">300 000 ₸</div>
-    <div style="font-size:13px;color:#999;margin-top:4px;">Ваш новый уровень зарплаты</div>
     <button class="cat-reward-btn" onclick="closeCatReward()">Отлично!</button>
   </div>
 </div>
@@ -3621,19 +3599,19 @@ const MODULES = [
 
 // ===== CAREER CATEGORIES (5 levels) =====
 const CATEGORIES = [
-  { id:1, name:'Новичок', salary:'200 000 ₸', icon:'&#127793;', color:'#4CAF50',
+  { id:1, name:'Новичок', icon:'&#127793;', color:'#4CAF50',
     desc:'Стажировка, адаптация, базовые аппаратные процедуры',
     procedures:['Прессотерапия','Миостимуляция','Термо-одеяло','Сауна','Кедровая бочка','Обёртывания','Скрабирование'] },
-  { id:2, name:'Вакуумный специалист', salary:'300 000 ₸', icon:'&#11088;', color:'#2196F3',
+  { id:2, name:'Вакуумный специалист', icon:'&#11088;', color:'#2196F3',
     desc:'LPG, вакуумный массаж, Золотое Сечение',
     procedures:['LPG массаж','Вакуумный массаж','Золотое сечение','Ролл Шейпер','Трон Кегеля'] },
-  { id:3, name:'Эксперт интенсивных методик', salary:'350 000 ₸', icon:'&#128293;', color:'#FF9800',
+  { id:3, name:'Эксперт интенсивных методик', icon:'&#128293;', color:'#FF9800',
     desc:'Турбо, Торнадо, Биофотон — глубинная работа с телом',
     procedures:['Турбо массаж','Биофотон','Биботинг','Квантовый массаж БЭМ','Impuls'] },
-  { id:4, name:'Специалист ручных методик', salary:'400 000 ₸', icon:'&#128142;', color:'#E91E63',
+  { id:4, name:'Специалист ручных методик', icon:'&#128142;', color:'#E91E63',
     desc:'Ручная пластика, лимфо/липокоррекция, самурайский массаж',
     procedures:['Антицеллюлитный массаж','Моделирующий массаж','Медовый массаж','Самурайский массаж','Бразильская выкатка','ИММТ','Блэйд','Хлопковый массаж'] },
-  { id:5, name:'Ведущий технолог', salary:'450 000 ₸', icon:'&#127942;', color:'#9C27B0',
+  { id:5, name:'Ведущий технолог', icon:'&#127942;', color:'#9C27B0',
     desc:'Вершина карьеры: наставничество, стандарты, лидерство',
     procedures:['Индиба','Криолиполиз','Вакуумная кавитация','3D моделирование','Магнэтик Про','Косметология'] }
 ];
@@ -10729,12 +10707,11 @@ function renderDashboard() {
   var sds = document.getElementById('statDaysSmall'); if(sds) sds.textContent = comp + '/' + TOTAL_LESSONS;
   var sss = document.getElementById('statStreakSmall'); if(sss) sss.textContent = state.streak;
 
-  // Category & salary stats
+  // Category stats
   var userCatLevel = getUserCategory();
   var userCatInfo = CATEGORIES[userCatLevel - 1];
   var scEl = document.getElementById('statCategory'); if(scEl) { scEl.textContent = 'Кат. ' + userCatLevel; scEl.style.color = userCatInfo.color; }
   var scnEl = document.getElementById('statCategoryName'); if(scnEl) scnEl.textContent = userCatInfo.name;
-  var ssEl = document.getElementById('statSalary'); if(ssEl) ssEl.textContent = userCatInfo.salary;
 
   const pf = document.getElementById('progressFill');
   pf.style.width = pct + '%';
@@ -10838,7 +10815,6 @@ function renderCategoryCards() {
         '<div class="cat-card-status">' + statusIcon + '</div>' +
       '</div>' +
       '<div class="cat-card-name">' + cat.name + '</div>' +
-      '<div class="cat-card-salary">' + cat.salary + '</div>' +
       '<div class="cat-card-progress-text"><span>' + stats.done + '/' + stats.total + ' уроков</span><span>' + stats.pct + '%</span></div>' +
       '<div class="cat-card-progress-bar"><div class="cat-card-progress-fill" style="width:' + stats.pct + '%;"></div></div>' +
       '<div class="cat-card-cta">' + ctaText + ' &rarr;</div>' +
@@ -10883,7 +10859,6 @@ function openCatDetail(catId) {
   document.getElementById('catDetailTag').textContent = catTagLabel;
   document.getElementById('catDetailTitle').textContent = cat.name;
   document.getElementById('catDetailSub').textContent = cat.desc;
-  document.getElementById('catDetailSalary').textContent = cat.salary;
   document.getElementById('catDetailCount').textContent = stats.done + '/' + stats.total;
   document.getElementById('catDetailPct').textContent = stats.pct + '%';
   var statusEl = document.getElementById('catDetailStatus');
@@ -11044,7 +11019,6 @@ function renderCareerTracker() {
         badgeHtml +
         '<div class="career-card-top">' +
           '<div class="career-card-title">Категория ' + cat.id + ' — ' + cat.name + '</div>' +
-          '<div class="career-salary" style="background:' + cat.color + '22;color:' + cat.color + ';">' + cat.salary + '</div>' +
         '</div>' +
         '<div class="career-card-desc">' + cat.desc + '</div>' +
         '<div class="career-procs">' + procsHtml + '</div>' +
@@ -11074,9 +11048,6 @@ function showCatReward(cat) {
   document.getElementById('catRewardIcon').innerHTML = cat.icon;
   document.getElementById('catRewardTitle').textContent = 'Категория ' + cat.id + ' пройдена!';
   document.getElementById('catRewardSub').textContent = cat.name + ' — разблокирован новый уровень!';
-  document.getElementById('catRewardSalary').textContent = cat.salary;
-  document.getElementById('catRewardSalary').style.background = cat.color + '22';
-  document.getElementById('catRewardSalary').style.color = cat.color;
   document.getElementById('catRewardOverlay').classList.add('show');
 }
 
@@ -13055,7 +13026,6 @@ function renderProfile() {
   // Profile category card
   var pCatStats = getCategoryStats(pCatLevel);
   var pcn = document.getElementById('profileCatName'); if(pcn) pcn.textContent = 'Категория ' + pCatLevel + ' — ' + pCatInfo.name;
-  var pcs = document.getElementById('profileCatSalary'); if(pcs) { pcs.textContent = pCatInfo.salary; pcs.style.background = pCatInfo.color + '22'; pcs.style.color = pCatInfo.color; }
   var pcp = document.getElementById('profileCatProgress'); if(pcp) { pcp.style.width = pCatStats.pct + '%'; pcp.style.background = pCatInfo.color; }
   var pcpt = document.getElementById('profileCatProgressText'); if(pcpt) pcpt.textContent = pCatStats.done + '/' + pCatStats.total + ' уроков категории';
   var pcnx = document.getElementById('profileCatNext');
